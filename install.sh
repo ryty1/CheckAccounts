@@ -40,7 +40,7 @@ if [[ ! -d "$PUBLIC_NODEJS_DIR" ]]; then
 fi
 
 if npm install dotenv basic-auth express > /dev/null; then
-    echo "依赖已成功安装！"
+    echo " [OK] 依赖已成功安装！"
     echo ""
 else
     echo "依赖安装失败，请检查 Node.js 环境。"
@@ -48,7 +48,7 @@ else
 fi
 
 if curl -s -o "$APP_JS_PATH" "$APP_JS_URL"; then
-    echo "配置文件 下载成功"
+    echo " [OK] 配置文件 下载成功"
 else
     echo "配置文件 下载失败，请检查下载地址。"
     exit 1
@@ -61,6 +61,6 @@ else
     echo "文件权限设置失败"
     exit 1
 fi
-echo "一键部署已完成。"
+echo " 【 恭 喜 】： 一 键 部 署 已 完 成 。"
 echo " "
-echo "保活地址 https://$DOMAIN/info"
+echo " **保活地址 https://$DOMAIN/info "
