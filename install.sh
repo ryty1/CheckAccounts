@@ -28,7 +28,7 @@ PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs"
 APP_JS_PATH="$PUBLIC_NODEJS_DIR/app.js"
 
 # 定义 app.js 文件的下载地址
-APP_JS_URL="https://example.com/path/to/app.js"
+APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/refs/heads/main/app.js"
 
 # 定义 Node.js 版本
 NODE_VERSION="22.9.0"
