@@ -22,7 +22,7 @@ DOMAIN_FOLDER_ROOT="/home/$USERNAME/domain"
 DOMAIN_DIR="$DOMAIN_FOLDER_ROOT/$DOMAIN"
 
 # 定义 Node.js 项目文件夹路径
-PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs"
+PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs/"
 
 # 定义 app.js 文件的路径
 APP_JS_PATH="$PUBLIC_NODEJS_DIR/app.js"
