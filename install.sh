@@ -4,7 +4,7 @@ if [[ -z "$USERNAME" ]]; then
     echo "无法获取当前系统用户名，脚本退出。"
     exit 1
 fi
-
+echo ""
 DOMAIN="$USERNAME.serv00.net"
 NODE_PORT=3000
 DOMAIN_FOLDER_ROOT="/home/$USERNAME/domains"
