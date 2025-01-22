@@ -14,7 +14,7 @@ APP_JS_PATH="$PUBLIC_NODEJS_DIR/app.js"
 APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
 
 echo "正在删除默认域名..."
-devil www del "$DOMAIN" 2>/dev/null
+devil www del "$DOMAIN"  > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
     echo "默认域名已成功删除。"
 else
@@ -26,7 +26,7 @@ if [[ -d "$DOMAIN_DIR" ]]; then
 fi
 
 echo "正在申请域名……"
-if devil www add "$DOMAIN" nodejs /usr/local/bin/node22; then
+if devil www add "$DOMAIN" nodejs /usr/local/bin/node22  > /dev/null 2>&1; then
     echo " $DOMAIN 已生成。"
 else
     echo "新域名生成失败，请检查环境配置。"
