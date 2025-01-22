@@ -59,7 +59,6 @@ else
     echo "文件权限设置失败"
     exit 1
 fi
-
 echo "一键部署已完成。"
 echo " "
 echo "保活地址 https://$DOMAIN/info"
