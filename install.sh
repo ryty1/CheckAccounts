@@ -33,16 +33,9 @@ APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
 # 定义 Node.js 版本
 NODE_VERSION="22.9.0"
 
-# 检查是否安装了 serv00-cli
-if ! command -v serv00-cli &>/dev/null; then
-    echo "错误: serv00-cli 未安装，无法继续。"
-    exit 1
-fi
-
 # 删除旧域名及其对应文件夹
 echo "正在删除旧域名 $DOMAIN..."
-serv00-cli domain delete "$DOMAIN" 2>/dev/null
-
+devil www del "$DOMAIN" 2>/dev/null
 if [[ -d "$DOMAIN_DIR" ]]; then
     echo "正在删除旧域名的文件夹：$DOMAIN_DIR"
     rm -rf "$DOMAIN_DIR"
@@ -51,47 +44,12 @@ fi
 
 # 添加新域名并绑定到 Node.js 应用
 echo "正在生成新域名 $DOMAIN..."
-serv00-cli domain add "$DOMAIN" --target-port "$NODE_PORT"
+devil www add "$DOMAIN" nodejs /usr/local/bin/node22
 
 # 创建新的域名文件夹及其子目录
 if [[ ! -d "$PUBLIC_NODEJS_DIR" ]]; then
     mkdir -p "$PUBLIC_NODEJS_DIR"
     echo "已创建新域名文件夹及子目录：$PUBLIC_NODEJS_DIR"
-fi
-
-# 安装 Node.js 到新域名目录下
-echo "正在安装 Node.js $NODE_VERSION 到 $PUBLIC_NODEJS_DIR..."
-cd "$PUBLIC_NODEJS_DIR" || exit
-
-# 安装 nvm（Node Version Manager）
-if [[ ! -d "$PUBLIC_NODEJS_DIR/.nvm" ]]; then
-    echo "安装 nvm 到 $PUBLIC_NODEJS_DIR..."
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-    export NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-    
-    # 检查 nvm 是否成功安装
-    if ! command -v nvm &>/dev/null; then
-        echo "错误: nvm 安装失败，无法继续。"
-        exit 1
-    fi
-fi
-
-# 安装指定版本的 Node.js
-echo "正在使用 nvm 安装 Node.js $NODE_VERSION..."
-NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm" nvm install "$NODE_VERSION"
-NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm" nvm use "$NODE_VERSION"
-NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm" nvm alias default "$NODE_VERSION"
-
-# 将 Node.js 的路径加入环境变量
-export PATH="$PUBLIC_NODEJS_DIR/.nvm/versions/node/v$NODE_VERSION/bin:$PATH"
-
-# 初始化 Node.js 项目并安装依赖
-echo "正在初始化 Node.js 项目并安装依赖..."
-if [[ ! -f package.json ]]; then
-    npm init -y > /dev/null
-    echo "已初始化 Node.js 项目：package.json"
 fi
 
 # 安装依赖（dotenv, basic-auth, express）
