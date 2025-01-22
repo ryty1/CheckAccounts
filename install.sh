@@ -49,19 +49,29 @@ if [[ ! -d "$PUBLIC_NODEJS_DIR" ]]; then
     echo "已创建新域名文件夹及子目录：$PUBLIC_NODEJS_DIR"
 fi
 
+# 初始化 Node.js 项目并安装依赖
+echo "正在初始化 Node.js 项目并安装依赖..."
+cd "$PUBLIC_NODEJS_DIR" || exit
+
+# 如果 package.json 不存在，则初始化 Node.js 项目
+if [[ ! -f package.json ]]; then
+    echo "初始化 package.json..."
+    npm init -y > /dev/null
+    echo "已初始化 Node.js 项目：package.json"
+fi
+
 # 安装依赖（dotenv, basic-auth, express）
-echo "正在安装依赖：dotenv, basic-auth, express..."
-npm install dotenv basic-auth express > /dev/null
-if [[ $? -eq 0 ]]; then
+echo "正在安装依赖到目录：$PUBLIC_NODEJS_DIR"
+if npm install dotenv basic-auth express > /dev/null; then
     echo "依赖已成功安装：dotenv, basic-auth, express"
 else
-    echo "依赖安装失败，请检查 Node.js 环境"
+    echo "依赖安装失败，请检查 Node.js 环境。"
     exit 1
 fi
 
 # 下载 app.js 文件到域名文件夹
 echo "正在下载 app.js 文件到：$APP_JS_PATH"
-if wget -q -O "$APP_JS_PATH" "$APP_JS_URL"; then
+if curl -s -o "$APP_JS_PATH" "$APP_JS_URL"; then
     echo "app.js 文件已成功下载到 $APP_JS_PATH"
 else
     echo "下载 app.js 文件失败，请检查下载地址：$APP_JS_URL"
