@@ -29,7 +29,7 @@ function executeCommand(commandToRun, actionName, isStartLog = false) {
     exec(commandToRun, function (err, stdout, stderr) {
         const timestamp = `${formattedDate} ${formattedTime}`;
         if (err) {
-            const errorMsg = ${timestamp} ${actionName} 执行错误: ${err.message};
+            const errorMsg = `${timestamp} ${actionName} 执行错误: ${err.message}`;
             logMessage(errorMsg);
             return;
         }
