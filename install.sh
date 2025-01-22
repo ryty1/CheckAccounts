@@ -13,7 +13,6 @@ PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs"
 APP_JS_PATH="$PUBLIC_NODEJS_DIR/app.js"
 APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
 
-echo "正在删除默认域名..."
 devil www del "$DOMAIN"  > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
     echo " [OK] 默认域名已成功删除。"
@@ -27,7 +26,6 @@ if [[ -d "$DOMAIN_DIR" ]]; then
     rm -rf "$DOMAIN_DIR"
 fi
 
-echo "正在申请域名……"
 if devil www add "$DOMAIN" nodejs /usr/local/bin/node22  > /dev/null 2>&1; then
     echo " [OK] $DOMAIN 已生成。"
     echo ""
@@ -40,7 +38,7 @@ fi
 if [[ ! -d "$PUBLIC_NODEJS_DIR" ]]; then
     mkdir -p "$PUBLIC_NODEJS_DIR"
 fi
-echo "正在安装依赖………"
+
 if npm install dotenv basic-auth express > /dev/null; then
     echo "依赖已成功安装！"
     echo ""
