@@ -52,7 +52,6 @@ fi
 echo "正在下载 app.js"
 if curl -s -o "$APP_JS_PATH" "$APP_JS_URL"; then
     echo "app.js 文件下载成功"
-    echo ""
 else
     echo "下载 app.js 文件失败，请检查下载地址。"
     exit 1
