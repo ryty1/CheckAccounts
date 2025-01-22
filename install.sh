@@ -16,22 +16,19 @@ DOMAIN="$USERNAME.serv00.net"
 NODE_PORT=3000
 
 # 定义存放域名文件夹的根路径
-DOMAIN_FOLDER_ROOT="/home/$USERNAME/domain"
+DOMAIN_FOLDER_ROOT="/home/$USERNAME/domains"
 
 # 定义新域名文件夹路径
 DOMAIN_DIR="$DOMAIN_FOLDER_ROOT/$DOMAIN"
 
 # 定义 Node.js 项目文件夹路径
-PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs/"
+PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs"
 
 # 定义 app.js 文件的路径
 APP_JS_PATH="$PUBLIC_NODEJS_DIR/app.js"
 
 # 定义 app.js 文件的下载地址
 APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
-
-# 定义 Node.js 版本
-NODE_VERSION="22.9.0"
 
 # 删除旧域名及其对应文件夹
 echo "正在删除旧域名 $DOMAIN..."
