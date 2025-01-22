@@ -26,7 +26,7 @@ if [[ -d "$DOMAIN_DIR" ]]; then
     rm -rf "$DOMAIN_DIR"
 fi
 
-if devil www add "$DOMAIN" nodejs /usr/local/bin/node22  > /dev/null 2>&1; then
+if devil www add "$DOMAIN" nodejs /usr/local/bin/node22 > /dev/null 2>&1; then
     echo " [OK] $DOMAIN 已生成。"
     echo ""
 else
@@ -39,7 +39,7 @@ if [[ ! -d "$PUBLIC_NODEJS_DIR" ]]; then
     mkdir -p "$PUBLIC_NODEJS_DIR"
 fi
 
-if npm install dotenv basic-auth express > /dev/null; then
+if npm install dotenv basic-auth express > /dev/null 2>&1; then
     echo " [OK] 依赖已成功安装！"
     echo ""
 else
