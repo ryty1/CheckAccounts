@@ -51,7 +51,7 @@ fi
 
 # 初始化 Node.js 项目并安装依赖
 echo "正在初始化 Node.js 项目并安装依赖..."
-cd "$PUBLIC_NODEJS_DIR" || exit
+cd "$DOMAIN_DIR" || exit
 
 # 如果 package.json 不存在，则初始化 Node.js 项目
 if [[ ! -f package.json ]]; then
