@@ -27,7 +27,7 @@ function executeCommand(commandToRun, actionName, isStartLog = false) {
     const formattedTime = currentDate.toLocaleTimeString();
 
     exec(commandToRun, function (err, stdout, stderr) {
-        const timestamp = ${formattedDate} ${formattedTime};
+        const timestamp = `${formattedDate} ${formattedTime}`;
         if (err) {
             const errorMsg = ${timestamp} ${actionName} 执行错误: ${err.message};
             logMessage(errorMsg);
