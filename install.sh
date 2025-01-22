@@ -17,8 +17,10 @@ echo "正在删除默认域名..."
 devil www del "$DOMAIN"  > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
     echo " [OK] 默认域名已成功删除。"
+    echo ""
 else
     echo "默认域名删除失败，可能不存在。"
+    echo ""
 fi
 
 if [[ -d "$DOMAIN_DIR" ]]; then
@@ -28,18 +30,20 @@ fi
 echo "正在申请域名……"
 if devil www add "$DOMAIN" nodejs /usr/local/bin/node22  > /dev/null 2>&1; then
     echo " [OK] $DOMAIN 已生成。"
+    echo ""
 else
     echo "新域名生成失败，请检查环境配置。"
+    echo ""
     exit 1
 fi
 
 if [[ ! -d "$PUBLIC_NODEJS_DIR" ]]; then
     mkdir -p "$PUBLIC_NODEJS_DIR"
 fi
-
 echo "正在安装依赖………"
 if npm install dotenv basic-auth express > /dev/null; then
     echo "依赖已成功安装！"
+    echo ""
 else
     echo "依赖安装失败，请检查 Node.js 环境。"
     exit 1
@@ -48,6 +52,7 @@ fi
 echo "正在下载 app.js"
 if curl -s -o "$APP_JS_PATH" "$APP_JS_URL"; then
     echo "app.js 文件下载成功"
+    echo ""
 else
     echo "下载 app.js 文件失败，请检查下载地址。"
     exit 1
