@@ -54,7 +54,7 @@ setInterval(KeepAlive, 20000);
 app.get("/info", (req, res) => {
     runShellCommand();
     KeepAlive();
-    res.type("html").send("<pre>Serv00 和 KeepAlive 已复活成功！</pre>");
+    res.type("html").send("<pre> singbox 和 KeepAlive 已复活成功！</pre>");
 });
 
 // /node_info 显示 start.sh 日志
