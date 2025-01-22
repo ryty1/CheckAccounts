@@ -28,10 +28,16 @@ PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs"
 APP_JS_PATH="$PUBLIC_NODEJS_DIR/app.js"
 
 # 定义 app.js 文件的下载地址
-APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/refs/heads/main/app.js"
+APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
 
 # 定义 Node.js 版本
 NODE_VERSION="22.9.0"
+
+# 检查是否安装了 serv00-cli
+if ! command -v serv00-cli &>/dev/null; then
+    echo "错误: serv00-cli 未安装，无法继续。"
+    exit 1
+fi
 
 # 删除旧域名及其对应文件夹
 echo "正在删除旧域名 $DOMAIN..."
@@ -64,17 +70,19 @@ if [[ ! -d "$PUBLIC_NODEJS_DIR/.nvm" ]]; then
     export NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    
+    # 检查 nvm 是否成功安装
+    if ! command -v nvm &>/dev/null; then
+        echo "错误: nvm 安装失败，无法继续。"
+        exit 1
+    fi
 fi
 
 # 安装指定版本的 Node.js
-if [[ ! -x "$PUBLIC_NODEJS_DIR/.nvm/versions/node/v$NODE_VERSION/bin/node" ]]; then
-    echo "正在使用 nvm 安装 Node.js $NODE_VERSION..."
-    NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm" nvm install "$NODE_VERSION"
-    NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm" nvm use "$NODE_VERSION"
-    NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm" nvm alias default "$NODE_VERSION"
-else
-    echo "Node.js $NODE_VERSION 已安装在 $PUBLIC_NODEJS_DIR"
-fi
+echo "正在使用 nvm 安装 Node.js $NODE_VERSION..."
+NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm" nvm install "$NODE_VERSION"
+NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm" nvm use "$NODE_VERSION"
+NVM_DIR="$PUBLIC_NODEJS_DIR/.nvm" nvm alias default "$NODE_VERSION"
 
 # 将 Node.js 的路径加入环境变量
 export PATH="$PUBLIC_NODEJS_DIR/.nvm/versions/node/v$NODE_VERSION/bin:$PATH"
