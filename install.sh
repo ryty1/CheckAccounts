@@ -55,6 +55,7 @@ fi
 
 chmod 644 "$APP_JS_PATH"
 if [[ $? -eq 0 ]]; then
+    echo ""
 else
     echo "文件权限设置失败"
     exit 1
