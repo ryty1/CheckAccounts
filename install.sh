@@ -63,10 +63,10 @@ else
 fi
 echo " 【 恭 喜 】： 一 键 部 署 已 完 成 。"
 echo " —————————————————————————————————————————————————————————————————————— "
-echo " |**保活地址 https://$DOMAIN/info "
+echo " |**保活网页 https://$DOMAIN/info "
 echo ""
-echo " |**保活地址 https://$DOMAIN/node_info "
+echo " |**查看节点 https://$DOMAIN/node_info "
 echo ""
-echo " |**保活地址 https://$DOMAIN/keepalive "
+echo " |**输出日志 https://$DOMAIN/keepalive "
 echo " —————————————————————————————————————————————————————————————————————— "
 echo 
