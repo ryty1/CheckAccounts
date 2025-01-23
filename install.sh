@@ -24,7 +24,7 @@ if [[ -d "$DOMAIN_DIR" ]]; then
     rm -rf "$DOMAIN_DIR"
 fi
 if devil www add "$DOMAIN" nodejs /usr/local/bin/node22 > /dev/null 2>&1; then
-    echo " [OK] Nodejs域名 已生成。"
+    echo " [OK] Nodejs 指向域名 已生成。"
     echo ""
 else
     echo "新域名生成失败，请检查环境配置。"
