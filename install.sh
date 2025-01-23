@@ -14,7 +14,7 @@ APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
 echo " ———————————————————————————————————————————————————————————— "
 devil www del "$DOMAIN"  > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
-    echo " [OK] 默认域名已成功删除。"
+    echo " [OK] 默认域名 已删除。"
     echo ""
 else
     echo "默认域名删除失败，可能不存在。"
