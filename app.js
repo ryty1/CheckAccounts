@@ -43,8 +43,8 @@ function runShellCommand() {
 
 // KeepAlive 函数
 function KeepAlive() {
-    const commandToRun = `bash ${process.env.HOME}/serv00-play/keepalive.sh`;
-    executeCommand(commandToRun, "keepalive.sh");
+    const commandToRun = `cd ${process.env.HOME}/serv00-play/ && bash keepalive.sh`;
+    executeCommand(commandToRun, "keepalive.sh", true);
 }
 
 // 每隔20秒自动执行 keepalive.sh
