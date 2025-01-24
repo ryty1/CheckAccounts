@@ -1,10 +1,11 @@
 #!/bin/bash
 USERNAME=$(whoami)
+USERNAME_DOMAIN=$(echo "$USERNAME" | tr '[:upper:]' '[:lower:]')
 if [[ -z "$USERNAME" ]]; then
     echo "无法获取当前系统用户名，脚本退出。"
     exit 1
 fi
-DOMAIN="$USERNAME.serv00.net"
+DOMAIN="$USERNAME_DOMAIN.serv00.net"
 NODE_PORT=3000
 DOMAIN_FOLDER_ROOT="/home/$USERNAME/domains"
 DOMAIN_DIR="$DOMAIN_FOLDER_ROOT/$DOMAIN"
@@ -12,7 +13,7 @@ PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs"
 APP_JS_PATH="$PUBLIC_NODEJS_DIR/app.js"
 APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
 echo " ———————————————————————————————————————————————————————————— "
-devil www del "$DOMAIN"  > /dev/null 2>&1
+devil www del "$USERNAME_DOMAIN"  > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
     echo " [OK] 默认域名 已删除。"
     echo ""
@@ -23,7 +24,7 @@ fi
 if [[ -d "$DOMAIN_DIR" ]]; then
     rm -rf "$DOMAIN_DIR"
 fi
-if devil www add "$DOMAIN" nodejs /usr/local/bin/node22 > /dev/null 2>&1; then
+if devil www add "$USERNAME_DOMAIN" nodejs /usr/local/bin/node22 > /dev/null 2>&1; then
     echo " [OK] Nodejs 指向域名 已生成。"
     echo ""
 else
