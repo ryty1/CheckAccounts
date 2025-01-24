@@ -8,10 +8,8 @@ fi
 echo ""
 DOMAIN="$USERNAME_DOMAIN.serv00.net"
 NODE_PORT=3000
-DOMAIN_FOLDER_ROOT="/home/$USERNAME/domains"
-DOMAIN_DIR="$DOMAIN_FOLDER_ROOT/$DOMAIN"
-PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs"
-APP_JS_PATH="$PUBLIC_NODEJS_DIR/app.js"
+DOMAIN_DIR="/home/$USERNAME/domains/$DOMAIN"
+APP_JS_PATH="$DOMAIN_DIR/public_nodejs/app.js"
 APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
 echo " ———————————————————————————————————————————————————————————— "
 devil www del "$DOMAIN"  > /dev/null 2>&1
