@@ -1,7 +1,6 @@
 #!/bin/bash
 USERNAME=$(whoami)
 USERNAME_DOMAIN=$(echo "$USERNAME" | tr '[:upper:]' '[:lower:]')
-cd /
 if [[ -z "$USERNAME" ]]; then
     echo "无法获取当前系统用户名，脚本退出。"
     exit 1
@@ -13,7 +12,7 @@ DOMAIN_DIR="/home/$USERNAME/domains/$DOMAIN"
 APP_JS_PATH="$DOMAIN_DIR/public_nodejs/app.js"
 APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
 echo " ———————————————————————————————————————————————————————————— "
-devil www del "$DOMAIN"  > /dev/null 2>&1
+cd && devil www del "$DOMAIN"  > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
     echo " [OK] 默认域名 删除成功 "
 else
@@ -31,8 +30,7 @@ fi
 if [[ ! -d "$DOMAIN_DIR" ]]; then
     mkdir -p "$DOMAIN_DIR"
 fi
-cd "$DOMAIN_DIR"
-npm init -y > /dev/null 2>&1
+cd "$DOMAIN_DIR" && npm init -y > /dev/null 2>&1
 if npm install dotenv basic-auth express > /dev/null 2>&1; then
     echo " [OK] 环境依赖 安装成功 "
 else
