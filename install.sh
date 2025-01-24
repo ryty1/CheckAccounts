@@ -1,6 +1,7 @@
 #!/bin/bash
 USERNAME=$(whoami)
 USERNAME_DOMAIN=$(echo "$USERNAME" | tr '[:upper:]' '[:lower:]')
+cd /
 if [[ -z "$USERNAME" ]]; then
     echo "无法获取当前系统用户名，脚本退出。"
     exit 1
@@ -30,6 +31,8 @@ fi
 if [[ ! -d "$DOMAIN_DIR" ]]; then
     mkdir -p "$DOMAIN_DIR"
 fi
+cd "$DOMAIN_DIR"
+npm init -y > /dev/null 2>&1
 if npm install dotenv basic-auth express > /dev/null 2>&1; then
     echo " [OK] 环境依赖 安装成功 "
 else
@@ -37,6 +40,7 @@ else
     exit 1
 fi
 if curl -s -o "$APP_JS_PATH" "$APP_JS_URL"; then
+    chmod 755 "$APP_JS_PATH"
     echo " [OK] 配置文件 下载成功 "
 else
     echo " [NO] 配置文件 下载失败 "
