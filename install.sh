@@ -14,7 +14,7 @@ PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs"
 APP_JS_PATH="$PUBLIC_NODEJS_DIR/app.js"
 APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
 echo " ———————————————————————————————————————————————————————————— "
-devil www del "$USERNAME_DOMAIN"  > /dev/null 2>&1
+devil www del "$DOMAIN"  > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
     echo " [OK] 默认域名 已删除。"
 else
@@ -23,7 +23,7 @@ fi
 if [[ -d "$DOMAIN_DIR" ]]; then
     rm -rf "$DOMAIN_DIR"
 fi
-if devil www add "$USERNAME_DOMAIN" nodejs /usr/local/bin/node22 > /dev/null 2>&1; then
+if devil www add "$DOMAIN" nodejs /usr/local/bin/node22 > /dev/null 2>&1; then
     echo " [OK] 类型域名 创建成功 "
 else
     echo " [NO] 类型域名 创建失败，请检查环境设置 "
