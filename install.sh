@@ -29,8 +29,8 @@ else
     echo " [NO] 类型域名 创建失败，请检查环境设置 "
     exit 1
 fi
-if [[ ! -d "$PUBLIC_NODEJS_DIR" ]]; then
-    mkdir -p "$PUBLIC_NODEJS_DIR"
+if [[ ! -d "$DOMAIN_DIR" ]]; then
+    mkdir -p "$DOMAIN_DIR"
 fi
 if npm install dotenv basic-auth express > /dev/null 2>&1; then
     echo " [OK] 环境依赖 安装成功 "
