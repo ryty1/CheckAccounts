@@ -27,7 +27,10 @@ function executeCommand(commandToRun, actionName, isStartLog = false) {
             logMessage(`${timestamp} ${actionName} 执行错误: ${err.message}`);
             return;
         }
-        if (stderr) logMessage(`${timestamp} ${actionName} 标准错误输出: ${stderr}`);
+        if (stderr) {
+            if (!stderr.includes("Could not open file msg.json: No such file or directory")) {
+                const stderrMsg = `${timestamp} ${actionName} 执行标准错误输出: ${stderr};
+                logMessage(stderrMsg)`;
         const successMsg = `${timestamp} ${actionName} 执行成功:\n${stdout}`;
         logMessage(successMsg);
 
