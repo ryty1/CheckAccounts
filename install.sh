@@ -10,7 +10,9 @@ DOMAIN="$USERNAME_DOMAIN.serv00.net"
 NODE_PORT=3000
 DOMAIN_DIR="/home/$USERNAME/domains/$DOMAIN"
 APP_JS_PATH="$DOMAIN_DIR/public_nodejs/app.js"
+HY2_IP_PATH="$DOMAIN_DIR/public_nodejs/hy2ip.sh"
 APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
+HY2_SH_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/hy2ip.sh"
 echo " ———————————————————————————————————————————————————————————— "
 cd && devil www del "$DOMAIN"  > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
@@ -37,20 +39,22 @@ else
     echo " [NO] 环境依赖 安装失败 "
     exit 1
 fi
-if curl -s -o "$APP_JS_PATH" "$APP_JS_URL"; then
-    chmod 755 "$APP_JS_PATH"
-    echo " [OK] 配置文件 下载成功 "
-else
-    echo " [NO] 配置文件 下载失败 "
+curl -s -o "$APP_JS_PATH" "$APP_JS_URL" && chmod 755 "$APP_JS_PATH" > /dev/null 2>&1
+if [[ $? -ne 0 ]]; then
+    print_status "配置文件 1 下载失败" 1
     exit 1
 fi
+curl -s -o "$HY2_IP_PATH" "$HY2_SH_URL" && chmod 755 "$HY2_IP_PATH" > /dev/null 2>&1
+if [[ $? -ne 0 ]]; then
+    print_status "配置文件 2 下载失败" 1
+    exit 1
+fi
+print_status "正在下载 配置文件" 0
 echo ""
 echo " 【 恭 喜 】： 网 页 保 活 一 键 部 署 已 完 成  "
 echo " ———————————————————————————————————————————————————————————— "
+echo ""
 echo " |**保活网页 https://$DOMAIN/info "
 echo ""
-echo " |**查看节点 https://$DOMAIN/node_info "
-echo ""
-echo " |**输出日志 https://$DOMAIN/keepalive "
 echo " ———————————————————————————————————————————————————————————— "
 echo ""
