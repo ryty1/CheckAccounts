@@ -229,7 +229,7 @@ app.get("/hy2ip", (req, res) => {
                     <h1>HY2_IP 更新</h1>
                     <p>请输入“更新”以确认执行 IP 更新。</p>
                     <form action="/hy2ip/execute" method="POST">
-                        <input type="text" name="confirmation" placeholder="请输入 更新">
+                        <input type="text" name="confirmation" placeholder="更新">
                         <button type="submit">提交</button>
                     </form>
                     <p>【注】：不同 IP 如成功更换，原线路会失效，请复制新信息食用。</p>
