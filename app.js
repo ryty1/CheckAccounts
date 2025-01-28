@@ -527,7 +527,7 @@ app.get("/node", (req, res) => {
 });
 
 app.get("/log", (req, res) => {
-    const command = "ps -A"; 
+    const command = "ps aux"; 
     exec(command, (err, stdout, stderr) => {
         if (err) {
             return res.type("html").send(`
