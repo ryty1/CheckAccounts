@@ -10,7 +10,7 @@ const app = express();
 const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
 const DOMAIN_DIR = path.join(process.env.HOME, "domains", `${username}.serv00.net`, "public_nodejs");
 
-const REMOTE_DIR_URL = 'https://raw.githubusercontent.com/ryty1/My-test/main/';
+const REMOTE_DIR_URL = 'https://raw.githubusercontent.com/ryty1/serv00-save-me/main/';
 
 // 需要排除的文件名（例如 README 文件）
 const EXCLUDED_FILES = ['README.md'];
@@ -221,9 +221,9 @@ app.get("/info", (req, res) => {
                     justify-content: center;
                     align-items: center;
                     height: 100vh;
-                    width: 100vw; /* 确保满屏 */
+                    width: 100vw;
                     padding: 0;
-                    overflow: hidden; /* 防止多余滚动 */
+                    overflow: hidden;
                 }
 
                 .content-container {
@@ -242,7 +242,7 @@ app.get("/info", (req, res) => {
                 }
 
                 .dynamic-text {
-                    font-size: max(25px, 4vw); /* 文字更大 */
+                    font-size: max(25px, 4vw);
                     font-weight: bold;
                     margin-bottom: 20px;
                     line-height: 1.3;
@@ -252,57 +252,62 @@ app.get("/info", (req, res) => {
 
                 @keyframes growShrink {
                     0% { transform: scale(1); }
-                    50% { transform: scale(1.15); } /* 增强放大效果 */
+                    50% { transform: scale(1.15); }
                     100% { transform: scale(1); }
                 }
 
                 .dynamic-text span {
                     display: inline-block;
-                    animation: growShrink 1s infinite; /* 动画更快 */
+                    animation: growShrink 1s infinite;
                     animation-delay: calc(0.08s * var(--char-index));
                 }
 
+                /* 强制每行显示两个按钮 */
                 .button-container {
                     margin-top: 30px;
                     display: flex;
                     flex-wrap: wrap;
                     gap: 10px;
-                    justify-content: center;
-                    width: 40%;
+                    justify-content: space-between; /* 让按钮两两分布 */
+                    width: 100%; /* 容器宽度设置为 100% */
+                    box-sizing: border-box;
                 }
 
+                /* 按钮样式 */
                 button {
                     padding: 12px 25px;
                     font-size: 20px;
-                    background-color: #007bff;
+                    background-color: #4CAF50; /* 绿色背景 */
                     color: white;
                     border: none;
                     border-radius: 4px;
                     cursor: pointer;
                     transition: background-color 0.3s ease, transform 0.1s;
-                    width: 48%;
-                    min-width: 120px;
+                    width: 45%; /* 保证每个按钮宽度为 48%，两列显示 */
+                    min-width: 150px; /* 保证按钮不会过窄 */
                     box-sizing: border-box;
                 }
 
                 button:hover {
-                    background-color: #0056b3;
+                    background-color: #45a049; /* 悬停时稍微深一点的绿色 */
                     transform: scale(1.05);
                 }
 
+                /* 响应式调整 */
                 @media (max-width: 600px) {
                     .dynamic-text {
                         font-size: max(18px, 5vw);
                     }
 
                     .button-container {
-                        flex-direction: column;
-                        width: 100%;
+                        flex-direction: row; /* 保证按钮横向排列 */
+                        width: 100%; /* 保证容器宽度适配 */
                     }
 
                     button {
-                        font-size: 18px;
-                        width: 100%;
+                        font-size: 16px;
+                        width: 45%; /* 每行两个按钮 */
+                        min-width: 120px; /* 最小宽度保证 */
                     }
 
                     .content-container {
