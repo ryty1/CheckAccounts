@@ -57,7 +57,7 @@ function KeepAlive() {
     const command = `cd ${process.env.HOME}/serv00-play/ && bash keepalive.sh`;
     executeCommand(command, "keepalive.sh", true);
 }
-
+setInterval(KeepAlive, 20000);
 /**
  * 递归获取目录下所有文件（排除本地 `public` 和 `tmp`）
  */
@@ -203,7 +203,6 @@ async function checkForUpdates() {
     return result;
 }
 
-setInterval(KeepAlive, 20000);
 app.get("/info", (req, res) => {
     runShellCommand();
     KeepAlive();
