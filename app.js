@@ -777,7 +777,7 @@ app.get('/ota', (req, res) => {
             }
             #result {
                 margin-top: 20px;
-                font-size: 16px;
+                font-size: 13px;
             }
             .result-item {
                 padding: 10px;
