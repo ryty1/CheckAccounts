@@ -710,7 +710,6 @@ app.get("/log", (req, res) => {
         `);
     });
 });
-
 // **执行 OTA 更新**
 app.get('/ota/update', (req, res) => {
     exec(otaScriptPath, (error, stdout, stderr) => {
@@ -727,7 +726,6 @@ app.get('/ota/update', (req, res) => {
         res.json({ success: true, output: stdout });
     });
 });
-
 // **前端页面 `/ota`**
 app.get('/ota', (req, res) => {
     res.send(`
@@ -749,7 +747,7 @@ app.get('/ota', (req, res) => {
                 height: 100vh;
             }
             .container {
-                width: 80%;
+                width: 90%;  /* 容器宽度增大 */
                 max-width: 800px;
                 padding: 20px;
                 background-color: #fff;
@@ -759,6 +757,7 @@ app.get('/ota', (req, res) => {
             h1 {
                 text-align: center;
                 color: #333;
+                font-size: 18px;
             }
             button {
                 display: block;
@@ -769,7 +768,7 @@ app.get('/ota', (req, res) => {
                 border: none;
                 border-radius: 5px;
                 cursor: pointer;
-                font-size: 16px;
+                font-size: 15px;
                 transition: background-color 0.3s;
             }
             button:hover {
@@ -777,7 +776,8 @@ app.get('/ota', (req, res) => {
             }
             #result {
                 margin-top: 20px;
-                font-size: 13px;
+                font-size: 12px;
+                word-wrap: break-word;
             }
             .result-item {
                 padding: 10px;
@@ -798,6 +798,35 @@ app.get('/ota', (req, res) => {
             .info {
                 background-color: #e0f7fa;
                 color: #0288d1;
+            }
+
+            /* Media queries for responsiveness */
+            @media (max-width: 768px) {
+                .container {
+                    width: 95%;  /* On smaller screens, container becomes wider */
+                    padding: 15px;
+                }
+                h1 {
+                    font-size: 16px;  /* Smaller font size for mobile */
+                }
+                button {
+                    font-size: 14px;  /* Smaller button text */
+                }
+                #result {
+                    font-size: 11px;  /* Smaller text in result */
+                }
+            }
+
+            @media (max-width: 480px) {
+                h1 {
+                    font-size: 14px;  /* Even smaller font size on very small screens */
+                }
+                button {
+                    font-size: 12px;  /* Smaller button text */
+                }
+                #result {
+                    font-size: 10px;  /* Smaller text in result */
+                }
             }
         </style>
     </head>
