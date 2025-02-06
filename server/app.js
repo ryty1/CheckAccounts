@@ -124,9 +124,6 @@ app.get("/getTelegramSettings", (req, res) => {
 });
 
 // 发送账号检测结果到 Telegram
-const TelegramBot = require('node-telegram-bot-api');
-const axios = require('axios');
-
 async function sendCheckResultsToTG() {
     try {
         const settings = getTelegramSettings();
@@ -147,16 +144,9 @@ async function sendCheckResultsToTG() {
         }
 
         let message = "📋 账号检测结果：\n";
-        const currentTime = new Date().toLocaleString(); // 获取当前时间
-
         Object.entries(data).forEach(([user, status], index) => {
-            const maskedUser = user.replace(/./g, '*');  // 用雪花遮罩账号
-            const userNameLength = maskedUser.length;
-            const padding = ' '.repeat(30 - userNameLength); // 确保冒号对齐
-            message += `${index + 1}. ${maskedUser}:${padding} ${status}\n`;
+            message += `${index + 1}. ${user}: ${status}\n`;
         });
-
-        message += `\n检测时间: ${currentTime}`; // 添加当前时间
 
         await bot.sendMessage(telegramChatId, message);
     } catch (error) {
