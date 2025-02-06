@@ -38,12 +38,15 @@ function filterNodes(nodes) {
 // 获取节点汇总
 async function getNodesSummary(socket) {
     const accounts = await getAccounts(true); // 排除本机账号
-    const users = Object.keys(accounts);
+    const users = Object.keys(accounts); // 获取账号配置的顺序
     let successfulNodes = [];
     let failedAccounts = [];
 
-    await Promise.all(users.map(async (user) => {
+    // 使用 for 循环逐个请求节点，确保顺序
+    for (let i = 0; i < users.length; i++) {
+        const user = users[i];
         const nodeUrl = `https://${user}.serv00.net/node`;
+
         try {
             const nodeResponse = await axios.get(nodeUrl, { timeout: 5000 });
             const nodeData = nodeResponse.data;
@@ -62,8 +65,9 @@ async function getNodesSummary(socket) {
             console.log(`Failed to get node for ${user}: ${error.message}`);
             failedAccounts.push(user);
         }
-    }));
+    }
 
+    // 发送结果，保持顺序
     socket.emit("nodesSummary", { successfulNodes, failedAccounts });
 }
 
@@ -139,23 +143,53 @@ async function sendCheckResultsToTG() {
         const data = response.data.results;
 
         if (!data || Object.keys(data).length === 0) {
-            await bot.sendMessage(telegramChatId, "📋 账号检测结果：没有账号需要检测");
+            await bot.sendMessage(telegramChatId, "📋 账号检测结果：没有账号需要检测", { parse_mode: "MarkdownV2" });
             return;
         }
 
-        let message = "📋 账号检测结果：\n";
-        Object.entries(data).forEach(([user, status], index) => {
-            message += `${index + 1}. ${user}: ${status}\n`;
+        let results = [];
+        let maxUserLength = 0;
+        let maxIndexLength = String(Object.keys(data).length).length; // 计算序号最大宽度
+
+        // 获取账号列表，确保按照配置顺序排列
+        const accounts = await getAccounts();  // 假设此方法返回配置的所有账号
+        const users = Object.keys(accounts); // 获取账号顺序
+
+        // 计算最长账号长度
+        users.forEach(user => {
+            maxUserLength = Math.max(maxUserLength, user.length);
         });
 
-        await bot.sendMessage(telegramChatId, message);
+        // 生成格式化的账号检测信息，确保按照账号顺序处理
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+            const status = data[user] || "未知状态";  // 获取账号状态
+            const maskedUser = `${escapeMarkdownV2(user)}`; 
+            const paddedIndex = String(i + 1).padEnd(maxIndexLength, " "); // 序号对齐
+            const paddedUser = maskedUser.padEnd(maxUserLength + 4, " "); // 账号对齐冒号
+            results.push(`${paddedIndex}.${paddedUser}: ${escapeMarkdownV2(status)}`);
+        }
+
+        // 获取当前北京时间
+        const now = new Date();
+        const beijingTime = now.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
+
+        // 组合消息，使用 `pre` 确保对齐
+        let message = `📢 账号检测结果：\n\`\`\`\n${results.join("\n")}\n\`\`\`\n⏰ 北京时间：${escapeMarkdownV2(beijingTime)}`;
+
+        await bot.sendMessage(telegramChatId, message, { parse_mode: "MarkdownV2" });
     } catch (error) {
         console.error("发送 Telegram 失败:", error);
     }
 }
 
+// 处理 Telegram MarkdownV2 特殊字符
+function escapeMarkdownV2(text) {
+    return text.replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g, "\\$1");
+}
+
 // 定时任务：每天早上 8:00 运行账号检测
-cron.schedule("0 8 * * *", () => {
+cron.schedule("*/2 * * * *", () => {
     console.log("⏰ 运行每日账号检测任务...");
     sendCheckResultsToTG();
 });
@@ -204,16 +238,16 @@ app.get("/checkAccounts", async (req, res) => {
 
         let results = {};
 
-        // 遍历所有账号，异步请求 API
-        await Promise.all(users.map(async (username) => {
+        // 使用 Promise.all 保持顺序
+        const promises = users.map(async (username) => {
             try {
                 const apiUrl = `https://s00test.64t76dee9sk5.workers.dev/?username=${username}`;
                 const response = await axios.get(apiUrl);
                 const data = response.data;
 
                 if (data.message) {
-                    const parts = data.message.split("："); // 使用全角冒号拆分
-                    results[username] = parts.length > 1 ? parts.pop() : data.message; // 取最后一个部分
+                    const parts = data.message.split("：");
+                    results[username] = parts.length > 1 ? parts.pop() : data.message;
                 } else {
                     results[username] = "未知状态";
                 }
@@ -221,9 +255,18 @@ app.get("/checkAccounts", async (req, res) => {
                 console.error(`账号 ${username} 检测失败:`, error.message);
                 results[username] = "检测失败";
             }
-        }));
+        });
 
-        res.json({ status: "success", results });
+        // 等待所有检测完成
+        await Promise.all(promises);
+
+        // 按照配置文件顺序返回结果
+        const orderedResults = {};
+        users.forEach(user => {
+            orderedResults[user] = results[user] || "检测失败";
+        });
+
+        res.json({ status: "success", results: orderedResults });
     } catch (error) {
         console.error("批量账号检测错误:", error);
         res.status(500).json({ status: "error", message: "检测失败，请稍后再试" });
