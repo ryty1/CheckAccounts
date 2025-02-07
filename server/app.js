@@ -130,9 +130,9 @@ app.get("/getTelegramSettings", (req, res) => {
 // 发送账号检测结果到 Telegram
 async function sendCheckResultsToTG() {
     try {
-        const settings = getTelegramSettings();
-        if (!settings) {
-            console.log("Telegram 设置不存在");
+        const settings = getNotificationSettings(); // ✅ 改用 getNotificationSettings()
+        if (!settings || !settings.telegramToken || !settings.telegramChatId) {
+            console.log("❌ Telegram 设置不存在或不完整");
             return;
         }
 
@@ -152,8 +152,8 @@ async function sendCheckResultsToTG() {
         let maxIndexLength = String(Object.keys(data).length).length; // 计算序号最大宽度
 
         // 获取账号列表，确保按照配置顺序排列
-        const accounts = await getAccounts();  // 假设此方法返回配置的所有账号
-        const users = Object.keys(accounts); // 获取账号顺序
+        const accounts = await getAccounts(); // ✅ 保留原来的账号顺序
+        const users = Object.keys(accounts);
 
         // 计算最长账号长度
         users.forEach(user => {
@@ -163,9 +163,9 @@ async function sendCheckResultsToTG() {
         // 生成格式化的账号检测信息，确保按照账号顺序处理
         for (let i = 0; i < users.length; i++) {
             const user = users[i];
-            const status = data[user] || "未知状态";  // 获取账号状态
-            const maskedUser = `${escapeMarkdownV2(user)}`; 
-            const paddedIndex = String(i + 1).padEnd(maxIndexLength, " "); // 序号对齐
+            const status = data[user] || "未知状态"; // ✅ 按账号顺序获取状态
+            const maskedUser = `${escapeMarkdownV2(user)}`;
+            const paddedIndex = String(i + 1).padEnd(maxIndexLength, " ");
             const paddedUser = maskedUser.padEnd(maxUserLength + 4, " "); // 账号对齐冒号
             results.push(`${paddedIndex}.${paddedUser}: ${escapeMarkdownV2(status)}`);
         }
@@ -179,7 +179,7 @@ async function sendCheckResultsToTG() {
 
         await bot.sendMessage(telegramChatId, message, { parse_mode: "MarkdownV2" });
     } catch (error) {
-        console.error("发送 Telegram 失败:", error);
+        console.error("❌ 发送 Telegram 失败:", error);
     }
 }
 
