@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const { exec } = require("child_process");
 const socketIo = require("socket.io");
 const axios = require("axios");
 const fs = require("fs");
@@ -12,6 +13,7 @@ const io = socketIo(server);
 const PORT = 3000;
 const ACCOUNTS_FILE = path.join(__dirname, "accounts.json");
 const SETTINGS_FILE = path.join(__dirname, "settings.json");
+const otaScriptPath = path.join(__dirname, 'ota.sh');
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json()); 
 const MAIN_SERVER_USER = process.env.USER || process.env.USERNAME || "default_user"; 
@@ -270,6 +272,27 @@ app.post("/setNotificationSettings", (req, res) => {
 resetCronJob();
 app.get("/notificationSettings", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "notification_settings.html"));
+});
+
+// **执行 OTA 更新**
+app.get('/ota/update', (req, res) => {
+    exec(otaScriptPath, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`❌ 执行脚本错误: ${error.message}`);
+            return res.status(500).json({ success: false, message: error.message });
+        }
+        if (stderr) {
+            console.error(`❌ 脚本错误输出: ${stderr}`);
+            return res.status(500).json({ success: false, message: stderr });
+        }
+        
+        // 返回脚本执行的结果
+        res.json({ success: true, output: stdout });
+    });
+});
+// **前端页面 `/ota`**
+app.get('/ota', (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "ota.html"));
 });
 
 server.listen(PORT, () => {
