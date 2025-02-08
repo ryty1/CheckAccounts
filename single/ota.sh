@@ -7,10 +7,11 @@ NODEJS_DIR="$BASE_DIR/public_nodejs"
 LOCAL_FILE_LIST="$NODEJS_DIR/file_list.txt"  
 LOCAL_VERSION_FILE="$NODEJS_DIR/version.txt"  
 
-# **远程文件 URL（修正变量定义顺序）
-REMOTE_DIR_URL="https://raw.githubusercontent.com/ryty1/serv00-save-me/main/single/"
-REMOTE_FILE_LIST_URL="${REMOTE_DIR_URL}file_list.txt"  
-REMOTE_VERSION_URL="${REMOTE_DIR_URL}version.txt"
+# **远程文件 URL（修正变量定义顺序 + 加入时间戳以绕过缓存）**
+REMOTE_DIR_URL="https://raw.githubusercontent.com/ryty1/My-test/main/single/"
+TIMESTAMP="?t=$(date +%s)" 
+REMOTE_FILE_LIST_URL="${REMOTE_DIR_URL}file_list.txt${TIMESTAMP}"
+REMOTE_VERSION_URL="${REMOTE_DIR_URL}version.txt${TIMESTAMP}"
 
 # **获取远程版本号**
 get_remote_version() {
@@ -39,7 +40,7 @@ get_local_file_list() {
 # **下载并覆盖远程文件**
 download_file() {
     local file_name=$1
-    curl -s -o "$NODEJS_DIR/$file_name" "${REMOTE_DIR_URL}${file_name}"
+    curl -s -o "$NODEJS_DIR/$file_name" "${REMOTE_DIR_URL}${file_name}${TIMESTAMP}"
     echo "✅ ${file_name} 更新完成"
 }
 
@@ -77,14 +78,10 @@ sync_files() {
     remote_files=$(get_remote_file_list)
     local_files=$(get_local_file_list)
 
-    # 只对存在于远程和本地 file_list 中的文件进行操作
     # 下载远程文件（覆盖本地文件）
     for file in $remote_files; do
-        # 如果该文件同时存在于本地 file_list.txt 中，才执行下载
-        if echo "$local_files" | grep -q "^$file$"; then
-            download_file "$file"
-            files_updated=true
-        fi
+        download_file "$file"
+        files_updated=true
     done
 
     # 删除本地无效文件（不在远程 file_list 中，且在本地 file_list 中）
