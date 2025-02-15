@@ -7,10 +7,7 @@ const app = express();
 
 const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
 const DOMAIN_DIR = path.join(process.env.HOME, "domains", `${username}.serv00.net`, "public_nodejs");
-// 定义 OTA 脚本路径
-const otaScriptPath = path.join(__dirname, 'ota.sh');
 
-// 允许静态文件访问
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(express.json());
@@ -45,7 +42,6 @@ function executeHy2ipScript(logMessages, callback) {
 
     const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
 
-    // 执行脚本并捕获输出
     exec(command, (error, stdout, stderr) => {
         callback(error, stdout, stderr);
     });
@@ -190,7 +186,6 @@ app.get("/info", (req, res) => {
     `);
 });
 
-// 中间件：解析请求体
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -373,7 +368,7 @@ app.post("/hy2ip/execute", (req, res) => {
                         updatedIp = line.split("Config 配置文件成功更新IP为")[1].trim();
                     }
                 });
-                // 去掉 ANSI 颜色码
+
                 if (updatedIp) {
                     updatedIp = updatedIp.replace(/\x1B\[[0-9;]*m/g, "");
                 }
@@ -397,7 +392,6 @@ app.post("/hy2ip/execute", (req, res) => {
     }
 });
 
-// 生成 HTML 页面
 function generateHtml(title, ip, logs, isError = false) {
     let ipColor = isError ? "red" : "black";
     let htmlLogs = logs.map(msg => `<p>${msg}</p>`).join("");
@@ -638,24 +632,23 @@ app.get("/log", (req, res) => {
                         }
 
                         .container {
-                            width: 95%; /* 让内容接近屏幕边缘 */
-                            max-width: 1200px; /* 避免大屏过宽 */
+                            width: 95%; 
+                            max-width: 1200px; 
                             background-color: #fff;
                             padding: 15px;
                             border-radius: 8px;
                             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
                             text-align: left;
                             box-sizing: border-box;
-                            min-height: 95vh; /* 适配 16:9，减少上下留白 */
+                            min-height: 95vh; 
                             display: flex;
                             flex-direction: column;
                             justify-content: center;
                         }
 
-                        /* 最近日志部分 */
                         pre.log {
                             margin-bottom: 15px;
-                            white-space: pre-wrap; /* 自动换行 */
+                            white-space: pre-wrap; 
                             word-wrap: break-word;
                             overflow-wrap: break-word;
                             border: 1px solid #ccc;
@@ -665,7 +658,6 @@ app.get("/log", (req, res) => {
                             border-radius: 5px;
                         }
 
-                        /* 进程详情部分 */
                         .scrollable {
                             max-height: 60vh;
                             overflow-x: auto;
@@ -683,8 +675,8 @@ app.get("/log", (req, res) => {
 
                         @media (max-width: 600px) {
                             .container {
-                                width: 98%; /* 在手机上更贴边 */
-                                min-height: 98vh; /* 贴合屏幕 */
+                                width: 98%; 
+                                min-height: 98vh; 
                             }
                             .scrollable {
                                 max-height: 50vh;
@@ -693,7 +685,7 @@ app.get("/log", (req, res) => {
 
                         @media (min-width: 1200px) {
                             .container {
-                                max-width: 1000px; /* 避免超宽屏幕内容过散 */
+                                max-width: 1000px; 
                             }
                         }
                     </style>
@@ -710,23 +702,45 @@ app.get("/log", (req, res) => {
         `);
     });
 });
-// **执行 OTA 更新**
+
 app.get('/ota/update', (req, res) => {
-    exec(otaScriptPath, (error, stdout, stderr) => {
+  const downloadScriptCommand = 'curl -Ls https://raw.githubusercontent.com/ryty1/serv00-save-me/refs/heads/main/single/ota.sh -o /tmp/ota.sh';
+
+    exec(downloadScriptCommand, (error, stdout, stderr) => {
         if (error) {
-            console.error(`❌ 执行脚本错误: ${error.message}`);
+            console.error(`❌ 下载脚本错误: ${error.message}`);
             return res.status(500).json({ success: false, message: error.message });
         }
         if (stderr) {
-            console.error(`❌ 脚本错误输出: ${stderr}`);
+            console.error(`❌ 下载脚本错误输出: ${stderr}`);
             return res.status(500).json({ success: false, message: stderr });
         }
-        
-        // 返回脚本执行的结果
-        res.json({ success: true, output: stdout });
+
+        const executeScriptCommand = 'bash /tmp/ota.sh';
+
+        exec(executeScriptCommand, (error, stdout, stderr) => {
+            exec('rm -f /tmp/ota.sh', (err) => {
+                if (err) {
+                    console.error(`❌ 删除临时文件失败: ${err.message}`);
+                } else {
+                    console.log('✅ 临时文件已删除');
+                }
+            });
+
+            if (error) {
+                console.error(`❌ 执行脚本错误: ${error.message}`);
+                return res.status(500).json({ success: false, message: error.message });
+            }
+            if (stderr) {
+                console.error(`❌ 脚本错误输出: ${stderr}`);
+                return res.status(500).json({ success: false, message: stderr });
+            }
+            
+            res.json({ success: true, output: stdout });
+        });
     });
 });
-// **前端页面 `/ota`**
+
 app.get('/ota', (req, res) => {
     res.send(`
     <!DOCTYPE html>
