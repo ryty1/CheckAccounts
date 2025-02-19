@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 
 // Singbox 配置文件路径
-const SINGBOX_CONFIG_PATH = path.resolve(process.env.HOME, 'serv00-play/singbox/singbox.json');
+const SINGBOX_CONFIG_PATH = path.join(process.env.HOME, "serv00-play", "singbox", "singbox.json");
 
 // 使用 JSON 中间件
 app.use(express.json());
