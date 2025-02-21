@@ -3,6 +3,7 @@ const path = require('path');
 const axios = require('axios');
 const express = require('express');
 const WebSocket = require('ws');
+const { exec } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -64,6 +65,21 @@ const saveFile = (filePath, content) => {
     fs.writeFileSync(localPath, content, 'utf8');
 };
 
+// **安装依赖**
+const installDependencies = () => {
+    return new Promise((resolve, reject) => {
+        const installCommand = 'npm install dotenv basic-auth express';  // 修改为你的依赖列表
+        exec(installCommand, (error, stdout, stderr) => {
+            if (error || stderr) {
+                reject(`❌ 安装依赖失败: ${error ? error.message : stderr}`);
+            } else {
+                console.log(`✅ 安装依赖完成: ${stdout}`);
+                resolve();
+            }
+        });
+    });
+};
+
 // **WebSocket 监听前端请求**
 wss.on('connection', async (ws) => {
     console.log('✅ Client connected');
@@ -89,14 +105,18 @@ wss.on('connection', async (ws) => {
         ws.send(JSON.stringify({ progress: 5, message: "🔍 获取文件列表..." }));
 
         try {
+            // 安装依赖
+            await installDependencies();
+            ws.send(JSON.stringify({ progress: 10, message: "✅ 依赖已安装" }));
+
             const fileList = await getFileList(tag);
             if (!fileList.length) {
                 ws.send(JSON.stringify({ progress: 100, message: "❌ 没有找到可更新的文件。" }));
                 return;
             }
 
-            let progress = 5;
-            const step = Math.floor(95 / fileList.length);
+            let progress = 10;
+            const step = Math.floor(90 / fileList.length);
 
             for (const file of fileList) {
                 progress += step;
