@@ -91,7 +91,7 @@ async function updateHistory(historyKey, statusCode, env) {
 async function sendTelegramAlert(targetUrl, statusCode, statusMessage, env) {
   const botToken = env.TG_BOT_TOKEN;
   const chatId = env.TG_CHAT_ID;
-  const message = `⚠️ 状态变化\n账号: ${user}\n新状态: ${statusCode} - ${statusMessage}`;
+  const message = `⚠️ 状态变化\n账号: ${user}\n新状态:  ${statusMessage}`;
 
   const tgUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
   const payload = {
