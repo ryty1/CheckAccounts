@@ -1,20 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Progress</title>
+    <title>GitHub 仓库更新</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-        #progress-container { width: 80%; margin: auto; background: #ddd; height: 20px; border-radius: 10px; margin-top: 20px; }
-        #progress-bar { height: 100%; width: 0%; background: #4CAF50; border-radius: 10px; transition: width 0.3s; }
-        #message { margin-top: 10px; }
+        #progress-container { width: 100%; background: #ddd; margin-top: 10px; }
+        #progress-bar { height: 10px; width: 0%; background: green; }
     </style>
 </head>
 <body>
-    <h2>Manual Update</h2>
-    <input type="text" id="tag" placeholder="Enter tag (e.g., v1.0.0)">
-    <button onclick="startUpdate()">Update All</button>
+    <h2>GitHub 仓库更新</h2>
+    <p>最新 GitHub 版本: <b id="latest-tag">加载中...</b></p>
+    <p>本地当前版本: <b id="local-tag">加载中...</b></p>
+    <button onclick="startUpdate()">更新到最新版本</button>
 
     <div id="progress-container">
         <div id="progress-bar"></div>
@@ -24,23 +23,21 @@
     <script>
         const socket = new WebSocket('ws://localhost:3000');
 
-        function startUpdate() {
-            const tag = document.getElementById('tag').value;
-            if (!tag) {
-                alert("Please enter a tag.");
-                return;
-            }
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
 
-            document.getElementById('progress-bar').style.width = '0%';
-            document.getElementById('message').textContent = 'Starting update...';
+            if (data.latestTag) document.getElementById('latest-tag').textContent = data.latestTag;
+            if (data.localTag) document.getElementById('local-tag').textContent = data.localTag;
 
-            socket.send(JSON.stringify({ tag }));
-
-            socket.onmessage = function(event) {
-                const data = JSON.parse(event.data);
+            if (data.progress !== undefined) {
                 document.getElementById('progress-bar').style.width = data.progress + '%';
                 document.getElementById('message').textContent = data.message;
-            };
+            }
+        };
+
+        function startUpdate() {
+            const tag = document.getElementById('latest-tag').textContent;
+            socket.send(JSON.stringify({ tag }));
         }
     </script>
 </body>
