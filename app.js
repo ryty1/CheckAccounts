@@ -9,8 +9,8 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const repoOwner = '<owner>';  // GitHub 用户名
-const repoName = '<repo>';    // GitHub 仓库名
+const repoOwner = 'ryty1';  // GitHub 用户名
+const repoName = 'My-test';    // GitHub 仓库名
 const repoFolder = 'single';  // 只下载 single 目录的内容
 const localFolder = '.';      // 文件存储在当前目录
 
