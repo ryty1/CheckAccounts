@@ -1,54 +1,140 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub 仓库更新</title>
+    <title>GitHub 文件更新</title>
     <style>
-        #progress-container { width: 100%; background: #ddd; margin-top: 10px; }
-        #progress-bar { height: 10px; width: 0%; background: green; }
-        #update-button:disabled { background-color: #ccc; cursor: not-allowed; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        #progressContainer {
+            margin-top: 20px;
+        }
+
+        #progressBar {
+            background-color: #ddd;
+            height: 20px;
+            border-radius: 10px;
+            width: 100%;
+        }
+
+        #progressBarFill {
+            height: 100%;
+            background-color: #4caf50;
+            width: 0%;
+            border-radius: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #updateStatus {
+            margin-top: 20px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h2>GitHub 仓库更新</h2>
-    <p>最新 GitHub 版本: <b id="latest-tag">加载中...</b></p>
-    <p>本地当前版本: <b id="local-tag">加载中...</b></p>
-    <button id="update-button" onclick="startUpdate()" disabled>更新到最新版本</button>
-
-    <div id="progress-container">
-        <div id="progress-bar"></div>
+    <div class="container">
+        <h1>GitHub 文件更新</h1>
+        <p id="versionInfo">获取版本信息中...</p>
+        <button id="checkUpdateBtn">检查更新</button>
+        <div id="progressContainer" style="display:none;">
+            <p id="progressText">进度: 0%</p>
+            <div id="progressBar">
+                <div id="progressBarFill"></div>
+            </div>
+        </div>
+        <div id="updateStatus"></div>
     </div>
-    <p id="message"></p>
 
     <script>
-        const socket = new WebSocket('ws://localhost:3000');
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkUpdateBtn = document.getElementById('checkUpdateBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBarFill = document.getElementById('progressBarFill');
+            const progressText = document.getElementById('progressText');
+            const updateStatus = document.getElementById('updateStatus');
+            const versionInfo = document.getElementById('versionInfo');
 
-        socket.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-
-            // 更新标签信息
-            if (data.latestTag) document.getElementById('latest-tag').textContent = data.latestTag;
-            if (data.localTag) document.getElementById('local-tag').textContent = data.localTag;
-
-            // 更新进度条
-            if (data.progress !== undefined) {
-                document.getElementById('progress-bar').style.width = data.progress + '%';
-                document.getElementById('message').textContent = data.message;
+            // 获取版本信息并显示
+            async function getVersionInfo() {
+                try {
+                    const response = await fetch('/api/tags');
+                    const data = await response.json();
+                    const { latestTag, localTag } = data;
+                    versionInfo.textContent = `最新版本: ${latestTag || '无法获取'} | 本地版本: ${localTag || '无'}`;
+                } catch (error) {
+                    versionInfo.textContent = '获取版本信息失败';
+                }
             }
 
-            // 启用按钮
-            if (data.progress === 10) {
-                document.getElementById('update-button').disabled = false;
-            }
-        };
+            // 检查更新并执行
+            checkUpdateBtn.addEventListener('click', async () => {
+                progressContainer.style.display = 'block';
+                updateStatus.textContent = '正在检查更新...';
 
-        function startUpdate() {
-            const tag = document.getElementById('latest-tag').textContent;
-            socket.send(JSON.stringify({ tag }));
-            // 在按钮点击后禁用按钮，避免重复点击
-            document.getElementById('update-button').disabled = true;
-        }
+                try {
+                    const response = await fetch('/api/update', {
+                        method: 'POST',
+                    });
+                    const data = await response.json();
+                    updateStatus.textContent = data.message;
+
+                    if (data.message === '✅ 已是最新版本，无需更新。') {
+                        progressContainer.style.display = 'none'; // 隐藏进度条
+                        return;
+                    }
+
+                    const ws = new WebSocket('ws://localhost:3000');
+                    ws.onopen = () => {
+                        ws.send(JSON.stringify({ tag: data.latestTag }));
+                    };
+
+                    ws.onmessage = (event) => {
+                        const data = JSON.parse(event.data);
+                        progressText.textContent = data.message;
+                        if (data.progress !== undefined) {
+                            progressBarFill.style.width = `${data.progress}%`;
+                        }
+                    };
+
+                } catch (error) {
+                    updateStatus.textContent = '❌ 更新失败，请重试';
+                }
+            });
+
+            getVersionInfo();
+        });
     </script>
 </body>
 </html>
