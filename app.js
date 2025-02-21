@@ -1,28 +1,20 @@
 export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
+  // 定义 Cron Triggers 的事件处理程序
+  async scheduled(event, env, ctx) {
+    // 每次 Cron 触发时执行的代码
     const user = env.USER_SERV00;
     const kvKey = `status:${user}`;
     const historyKey = `history:${user}`;
     const targetUrl = `https://${user}.serv00.net/login`;
 
-    if (url.pathname === "/status") {
-      return await getStatus(kvKey, env);
-    }
+    console.log(`[${new Date().toISOString()}] 定时任务触发，检查状态：${targetUrl}`);
 
-    if (url.pathname === "/history") {
-      return await getHistory(historyKey, env);
-    }
-
-    if (url.pathname === "/force-check") {
-      return await checkLoginStatus(targetUrl, kvKey, historyKey, env, true);
-    }
-
-    return await checkLoginStatus(targetUrl, kvKey, historyKey, env, false);
+    // 调用检查登录状态的函数
+    await checkLoginStatus(targetUrl, kvKey, historyKey, env);
   }
 };
 
-// 状态码映射
+// 状态码映射到中文标识
 const statusMessages = {
   200: "保活成功",
   400: "保活失败",
@@ -35,36 +27,28 @@ const statusMessages = {
   504: "保活失败"
 };
 
-// 获取当前状态
-async function getStatus(kvKey, env) {
-  const statusCode = await env.LOGIN_STATUS.get(kvKey);
-  const message = statusMessages[statusCode] || "未知状态";
-  return new Response(`当前状态: ${statusCode} - ${message}`);
-}
-
-// 获取最近 N 次历史记录
-async function getHistory(historyKey, env) {
-  const history = await env.LOGIN_STATUS.get(historyKey);
-  return new Response(history || "无历史记录");
-}
-
-// 检测 `login` 页面状态
-async function checkLoginStatus(targetUrl, kvKey, historyKey, env, force) {
+// 检查登录页面状态并记录
+async function checkLoginStatus(targetUrl, kvKey, historyKey, env) {
   try {
+    // 访问目标 URL
     const response = await fetch(targetUrl);
     const statusCode = response.status;
     const statusMessage = statusMessages[statusCode] || `未知状态 (${statusCode})`;
 
+    // 获取上次的状态码
     const previousStatus = await env.LOGIN_STATUS.get(kvKey);
     console.log(`[${new Date().toISOString()}] ${targetUrl} - 状态码: ${statusCode} (${statusMessage}) (之前: ${previousStatus || '无'})`);
 
     // 记录历史状态
     await updateHistory(historyKey, statusCode, env);
 
-    if (force || previousStatus !== String(statusCode)) {
+    // 如果状态码不是 200，则发送 Telegram 通知
+    if (statusCode !== 200) {
       await sendTelegramAlert(targetUrl, statusCode, statusMessage, env);
-      await env.LOGIN_STATUS.put(kvKey, String(statusCode));  
     }
+
+    // 更新当前状态码
+    await env.LOGIN_STATUS.put(kvKey, String(statusCode));  
 
     return new Response(`检测完成: ${targetUrl} - 状态码: ${statusCode} - ${statusMessage}`, { status: statusCode });
 
