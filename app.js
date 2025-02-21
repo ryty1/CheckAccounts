@@ -39,7 +39,7 @@ const statusMessages = {
 async function getStatus(kvKey, env) {
   const statusCode = await env.LOGIN_STATUS.get(kvKey);
   const message = statusMessages[statusCode] || "未知状态";
-  return new Response(`当前状态: ${user} - ${message}`);
+  return new Response(`当前状态: ${statusCode} - ${message}`);
 }
 
 // 获取最近 N 次历史记录
@@ -56,7 +56,7 @@ async function checkLoginStatus(targetUrl, kvKey, historyKey, env, force) {
     const statusMessage = statusMessages[statusCode] || `未知状态 (${statusCode})`;
 
     const previousStatus = await env.LOGIN_STATUS.get(kvKey);
-    console.log(`[${new Date().toISOString()}] ${user} -  (${statusMessage}) (之前: ${previousStatus || '无'})`);
+    console.log(`[${new Date().toISOString()}] ${targetUrl} - 状态码: ${statusCode} (${statusMessage}) (之前: ${previousStatus || '无'})`);
 
     // 记录历史状态
     await updateHistory(historyKey, statusCode, env);
@@ -91,7 +91,7 @@ async function updateHistory(historyKey, statusCode, env) {
 async function sendTelegramAlert(targetUrl, statusCode, statusMessage, env) {
   const botToken = env.TG_BOT_TOKEN;
   const chatId = env.TG_CHAT_ID;
-  const message = `⚠️ 状态变化\n账号: ${user}\n新状态:  ${statusMessage}`;
+  const message = `⚠️ 状态变化\nURL: ${targetUrl}\n新状态: ${statusCode} - ${statusMessage}`;
 
   const tgUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
   const payload = {
