@@ -7,13 +7,14 @@
     <style>
         #progress-container { width: 100%; background: #ddd; margin-top: 10px; }
         #progress-bar { height: 10px; width: 0%; background: green; }
+        #update-button:disabled { background-color: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
     <h2>GitHub 仓库更新</h2>
     <p>最新 GitHub 版本: <b id="latest-tag">加载中...</b></p>
     <p>本地当前版本: <b id="local-tag">加载中...</b></p>
-    <button onclick="startUpdate()">更新到最新版本</button>
+    <button id="update-button" onclick="startUpdate()" disabled>更新到最新版本</button>
 
     <div id="progress-container">
         <div id="progress-bar"></div>
@@ -26,18 +27,27 @@
         socket.onmessage = function(event) {
             const data = JSON.parse(event.data);
 
+            // 更新标签信息
             if (data.latestTag) document.getElementById('latest-tag').textContent = data.latestTag;
             if (data.localTag) document.getElementById('local-tag').textContent = data.localTag;
 
+            // 更新进度条
             if (data.progress !== undefined) {
                 document.getElementById('progress-bar').style.width = data.progress + '%';
                 document.getElementById('message').textContent = data.message;
+            }
+
+            // 启用按钮
+            if (data.progress === 10) {
+                document.getElementById('update-button').disabled = false;
             }
         };
 
         function startUpdate() {
             const tag = document.getElementById('latest-tag').textContent;
             socket.send(JSON.stringify({ tag }));
+            // 在按钮点击后禁用按钮，避免重复点击
+            document.getElementById('update-button').disabled = true;
         }
     </script>
 </body>
