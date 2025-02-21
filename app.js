@@ -18,15 +18,28 @@ export default {
       return await checkLoginStatus(targetUrl, kvKey, historyKey, env, true);
     }
 
-    // 默认进行定时任务检测
     return await checkLoginStatus(targetUrl, kvKey, historyKey, env, false);
   }
 };
 
+// 状态码映射
+const statusMessages = {
+  200: "保活成功",
+  400: "保活失败",
+  401: "保活失败",
+  403: "账号己封禁",
+  404: "未安装账号服务",
+  500: "保活失败",
+  502: "保活失败",
+  503: "保活失败",
+  504: "保活失败"
+};
+
 // 获取当前状态
 async function getStatus(kvKey, env) {
-  const status = await env.LOGIN_STATUS.get(kvKey) || "未知";
-  return new Response(`当前状态: ${status}`);
+  const statusCode = await env.LOGIN_STATUS.get(kvKey);
+  const message = statusMessages[statusCode] || "未知状态";
+  return new Response(`当前状态: ${user} - ${message}`);
 }
 
 // 获取最近 N 次历史记录
@@ -40,31 +53,31 @@ async function checkLoginStatus(targetUrl, kvKey, historyKey, env, force) {
   try {
     const response = await fetch(targetUrl);
     const statusCode = response.status;
-    
-    const previousStatus = await env.LOGIN_STATUS.get(kvKey);
+    const statusMessage = statusMessages[statusCode] || `未知状态 (${statusCode})`;
 
-    console.log(`[${new Date().toISOString()}] ${targetUrl} - 状态码: ${statusCode} (之前: ${previousStatus || '无'})`);
+    const previousStatus = await env.LOGIN_STATUS.get(kvKey);
+    console.log(`[${new Date().toISOString()}] ${user} -  (${statusMessage}) (之前: ${previousStatus || '无'})`);
 
     // 记录历史状态
     await updateHistory(historyKey, statusCode, env);
 
     if (force || previousStatus !== String(statusCode)) {
-      await sendTelegramAlert(targetUrl, statusCode, env);
-      await env.LOGIN_STATUS.put(kvKey, String(statusCode));  // 更新 KV 状态
+      await sendTelegramAlert(targetUrl, statusCode, statusMessage, env);
+      await env.LOGIN_STATUS.put(kvKey, String(statusCode));  
     }
 
-    return new Response(`检测完成: ${targetUrl} - 状态码: ${statusCode}`, { status: statusCode });
+    return new Response(`检测完成: ${targetUrl} - 状态码: ${statusCode} - ${statusMessage}`, { status: statusCode });
 
   } catch (error) {
     console.error("访问失败:", error);
-    await sendTelegramAlert(targetUrl, "请求失败", env);
+    await sendTelegramAlert(targetUrl, "请求失败", "无法访问", env);
     return new Response("请求失败", { status: 500 });
   }
 }
 
 // 更新历史状态
 async function updateHistory(historyKey, statusCode, env) {
-  const maxHistory = 10; // 保留最近 10 次
+  const maxHistory = 10;
   let history = await env.LOGIN_STATUS.get(historyKey);
   history = history ? JSON.parse(history) : [];
 
@@ -75,10 +88,10 @@ async function updateHistory(historyKey, statusCode, env) {
 }
 
 // 发送 Telegram 通知
-async function sendTelegramAlert(targetUrl, statusCode, env) {
+async function sendTelegramAlert(targetUrl, statusCode, statusMessage, env) {
   const botToken = env.TG_BOT_TOKEN;
   const chatId = env.TG_CHAT_ID;
-  const message = `⚠️ 状态变化\nURL: ${targetUrl}\n新状态: ${statusCode}`;
+  const message = `⚠️ 状态变化\n账号: ${user}\n新状态: ${statusCode} - ${statusMessage}`;
 
   const tgUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
   const payload = {
