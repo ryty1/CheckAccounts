@@ -1,140 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub 文件更新</title>
+    <title>出站管理</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-
-        .container {
             text-align: center;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            margin: 20px;
         }
-
-        #progressContainer {
-            margin-top: 20px;
+        h1 {
+            font-size: 24px;
         }
-
-        #progressBar {
-            background-color: #ddd;
-            height: 20px;
-            border-radius: 10px;
-            width: 100%;
+        .status {
+            font-size: 18px;
+            margin-bottom: 20px;
         }
-
-        #progressBarFill {
-            height: 100%;
-            background-color: #4caf50;
-            width: 0%;
-            border-radius: 10px;
-        }
-
         button {
-            padding: 10px 20px;
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            padding: 10px 15px;
+            margin: 10px;
             font-size: 16px;
+            cursor: pointer;
         }
-
-        button:hover {
-            background-color: #45a049;
+        input {
+            padding: 8px;
+            margin: 5px;
+            width: 200px;
         }
-
-        #updateStatus {
-            margin-top: 20px;
-            font-weight: bold;
+        .socks-settings {
+            display: none;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>GitHub 文件更新</h1>
-        <p id="versionInfo">获取版本信息中...</p>
-        <button id="checkUpdateBtn">检查更新</button>
-        <div id="progressContainer" style="display:none;">
-            <p id="progressText">进度: 0%</p>
-            <div id="progressBar">
-                <div id="progressBarFill"></div>
-            </div>
-        </div>
-        <div id="updateStatus"></div>
+
+    <h1>出站管理</h1>
+
+    <div class="status">当前出站状态: <span id="status">加载中...</span></div>
+
+    <button onclick="setWireGuard()">切换到 WireGuard</button>
+    <button onclick="showSocksSettings()">切换到 Socks</button>
+    <button onclick="disableOutbound()">关闭出站</button>
+
+    <div class="socks-settings" id="socks-settings">
+        <h3>Socks 配置</h3>
+        <input type="text" id="server" placeholder="服务器地址">
+        <input type="number" id="server_port" placeholder="端口">
+        <input type="text" id="username" placeholder="用户名">
+        <input type="password" id="password" placeholder="密码">
+        <button onclick="setSocks()">确认设置 Socks</button>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkUpdateBtn = document.getElementById('checkUpdateBtn');
-            const progressContainer = document.getElementById('progressContainer');
-            const progressBarFill = document.getElementById('progressBarFill');
-            const progressText = document.getElementById('progressText');
-            const updateStatus = document.getElementById('updateStatus');
-            const versionInfo = document.getElementById('versionInfo');
+        // 获取当前出站状态
+        async function getOutboundStatus() {
+            try {
+                let res = await fetch("/getOutboundStatus");
+                let data = await res.json();
+                document.getElementById("status").textContent = data.status;
+            } catch (err) {
+                document.getElementById("status").textContent = "无法获取状态";
+            }
+        }
 
-            // 获取版本信息并显示
-            async function getVersionInfo() {
-                try {
-                    const response = await fetch('/api/tags');
-                    const data = await response.json();
-                    const { latestTag, localTag } = data;
-                    versionInfo.textContent = `最新版本: ${latestTag || '无法获取'} | 本地版本: ${localTag || '无'}`;
-                } catch (error) {
-                    versionInfo.textContent = '获取版本信息失败';
-                }
+        // 切换到 WireGuard
+        async function setWireGuard() {
+            await fetch("/setWireGuard", { method: "POST" });
+            alert("WireGuard 出站已设置");
+            getOutboundStatus();
+        }
+
+        // 显示 Socks 配置输入框
+        function showSocksSettings() {
+            document.getElementById("socks-settings").style.display = "block";
+        }
+
+        // 设置 Socks 出站
+        async function setSocks() {
+            let server = document.getElementById("server").value;
+            let server_port = document.getElementById("server_port").value;
+            let username = document.getElementById("username").value;
+            let password = document.getElementById("password").value;
+
+            if (!server || !server_port || !username || !password) {
+                alert("请填写完整的 Socks 配置");
+                return;
             }
 
-            // 检查更新并执行
-            checkUpdateBtn.addEventListener('click', async () => {
-                progressContainer.style.display = 'block';
-                updateStatus.textContent = '正在检查更新...';
-
-                try {
-                    const response = await fetch('/api/update', {
-                        method: 'POST',
-                    });
-                    const data = await response.json();
-                    updateStatus.textContent = data.message;
-
-                    if (data.message === '✅ 已是最新版本，无需更新。') {
-                        progressContainer.style.display = 'none'; // 隐藏进度条
-                        return;
-                    }
-
-                    const ws = new WebSocket('ws://localhost:3000');
-                    ws.onopen = () => {
-                        ws.send(JSON.stringify({ tag: data.latestTag }));
-                    };
-
-                    ws.onmessage = (event) => {
-                        const data = JSON.parse(event.data);
-                        progressText.textContent = data.message;
-                        if (data.progress !== undefined) {
-                            progressBarFill.style.width = `${data.progress}%`;
-                        }
-                    };
-
-                } catch (error) {
-                    updateStatus.textContent = '❌ 更新失败，请重试';
-                }
+            await fetch("/setSocks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ server, server_port, username, password })
             });
 
-            getVersionInfo();
-        });
+            alert("Socks 出站已设置");
+            getOutboundStatus();
+        }
+
+        // 关闭所有出站
+        async function disableOutbound() {
+            await fetch("/disableOutbound", { method: "POST" });
+            alert("出站已关闭");
+            getOutboundStatus();
+        }
+
+        // 页面加载时获取出站状态
+        getOutboundStatus();
     </script>
+
 </body>
 </html>
