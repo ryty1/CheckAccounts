@@ -56,7 +56,7 @@
 <body>
     <h1>账号检测</h1>
     <form id="accountForm">
-        <label for="accounts">请输入账号，多个账号每行一个（仅支持大小写字母和数字）：</label><br>
+        <label for="accounts">请输入账号，多个账号每行一个</label><br><br>
         <textarea id="accounts" name="accounts"></textarea><br><br>
         <button type="submit">开始检测</button>
     </form>
@@ -78,7 +78,7 @@
             const validAccounts = accounts.filter(account => /^[A-Za-z0-9]+$/.test(account)); // 仅允许大小写字母和数字
             
             if (validAccounts.length === 0) {
-                alert('请输入有效的账号（仅支持大小写字母和数字）');
+                alert('请输入有效的账号');
                 return;
             }
 
