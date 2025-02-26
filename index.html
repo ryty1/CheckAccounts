@@ -87,6 +87,14 @@
             flex-grow: 1;
             padding-right: 10px;
         }
+
+        .account {
+            color: inherit;
+        }
+
+        .status {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -168,7 +176,7 @@
             return data.split('\n').map(line => {
                 const [account, status] = line.split(':');
                 const statusClass = statusMessages[status.trim()] || 'status-unknown';
-                return `<div class="output-line"><span>${account}:</span><span class="${statusClass}">${status.trim()}</span></div>`;
+                return `<div class="output-line"><span class="account">${account}:</span><span class="status ${statusClass}">${status.trim()}</span></div>`;
             }).join('');
         }
     </script>
