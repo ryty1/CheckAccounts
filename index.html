@@ -87,24 +87,25 @@
             white-space: pre-wrap;
         }
 
-        /* 对齐账号和状态 */
+        /* 强制只改变状态部分的颜色，账号和冒号保持默认颜色 */
         .output-line {
             display: flex;
-            justify-content: space-between;
-            width: 100%;
+            justify-content: space-between; /* 将账号和状态分开，并对齐 */
+            width: 100%; /* 确保宽度占满父容器 */
         }
 
         .output-line .account {
-            flex: 1;
-            text-align: left;
-            padding-right: 20px;
-        }
+            color: inherit; /* 确保账号部分颜色不变 */
+            padding-right: 20px; /* 给账号和冒号之间添加一点间隔 */
+            width: 80%; /* 确保账号部分的宽度固定，使冒号对齐 */
+            text-align: left; /* 确保账号左对齐 */
+       }
 
-        .output-line .status {
-            font-weight: bold;
-            text-align: left;
-            min-width: 120px;
-        }
+       .output-line .status {
+           font-weight: bold;
+           text-align: left; /* 确保状态左对齐 */
+           width: 100%; /* 给状态部分占据更多宽度 */
+       }
     </style>
 </head>
 <body>
@@ -196,10 +197,7 @@
             return data.split('\n').map(line => {
                 const [account, status] = line.split(':');
                 const statusClass = statusMessages[status.trim()] || 'status-unknown';
-                return `<div class="output-line">
-                            <span class="account">${account}</span>:   
-                            <span class="status ${statusClass}">${status.trim()}</span>
-                        </div>`;
+                return `<div class="output-line"><span class="account">${account}</span>:   <span class="status ${statusClass}">${status.trim()}</span></div>`;
             }).join('');
         }
     </script>
