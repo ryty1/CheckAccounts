@@ -34,16 +34,17 @@
         textarea {
             width: 100%;
             height: 150px;
-            font-size: 16px; /* 防止手机放大 */
+            font-size: 16px;
             margin-bottom: 10px;
             padding: 10px;
             border-radius: 6px;
             border: 1px solid #ccc;
+            resize: vertical; /* 只允许上下调整 */
         }
 
         button {
-            font-size: 18px; /* 字体更大 */
-            padding: 12px 20px; /* 按钮更大 */
+            font-size: 18px;
+            padding: 12px 20px;
             cursor: pointer;
             border: none;
             border-radius: 6px;
@@ -53,7 +54,7 @@
             transition: 0.3s;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             display: block;
-            margin: 0 auto; /* 按钮居中 */
+            margin: 0 auto;
         }
 
         button:hover {
@@ -75,8 +76,10 @@
         .status-normal { background: #e6f7e6; color: #007700; } /* 账号正常 */
         .status-banned { background: #ffe6e6; color: #cc0000; } /* 账号封禁 */
         .status-error { background: #fff3cd; color: #856404; }  /* 服务器错误 */
-        .status-other { background: #e6f0ff; color: #0044cc; }  /* 其他未知 */
         .status-unregistered { background: #f0f0f0; color: #666666; } /* 账号未注册 */
+        .status-unavailable { background: #ffebcd; color: #b34d00; } /* VPS不可用 */
+        .status-timeout { background: #f8d7da; color: #721c24; } /* 网关超时 */
+        .status-unknown { background: #e0e0e0; color: #333333; } /* 未知状态 */
     </style>
 </head>
 <body>
@@ -101,11 +104,27 @@
             }
 
             const accounts = accountsInput.split('\n').map(account => account.trim());
-            const validAccounts = accounts.filter(account => /^[A-Za-z0-9]+$/.test(account)); // 仅允许大小写字母和数字
-            
+            const validAccounts = [];
+            const invalidAccounts = [];
+
+            // 对每个账号进行格式验证
+            accounts.forEach(account => {
+                if (/^[A-Za-z0-9]+$/.test(account)) {
+                    validAccounts.push(account);
+                } else {
+                    invalidAccounts.push(account);
+                }
+            });
+
+            // 如果没有有效的账号
             if (validAccounts.length === 0) {
                 alert('请输入有效的账号');
                 return;
+            }
+
+            // 如果有无效账号
+            if (invalidAccounts.length > 0) {
+                alert('以下账号格式无效: ' + invalidAccounts.join(', '));
             }
 
             document.getElementById('loading').style.display = 'block';
@@ -116,25 +135,11 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ accounts: validAccounts })
             })
-            .then(response => response.text())  
+            .then(response => response.text())  // 返回的是HTML字符串
             .then(data => {
                 document.getElementById('loading').style.display = 'none';
                 const resultDiv = document.getElementById('result');
-
-                // 解析数据并匹配不同状态颜色
-                if (data.includes("账号已封禁")) {
-                    resultDiv.className = "result status-banned";
-                } else if (data.includes("服务器内部错误") || data.includes("服务器不可用")) {
-                    resultDiv.className = "result status-error";
-                } else if (data.includes("账号正常")) {
-                    resultDiv.className = "result status-normal";
-                } else if (data.includes("账号未注册")) {
-                    resultDiv.className = "result status-unregistered";
-                } else {
-                    resultDiv.className = "result status-other";
-                }
-
-                resultDiv.textContent = data;
+                resultDiv.innerHTML = data;
                 resultDiv.style.display = 'block';
             })
             .catch(error => {
