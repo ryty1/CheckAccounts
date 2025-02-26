@@ -1,2 +1,1 @@
-# htmlalive
-serv00进程保活
+# serv00部署PHP检测账号状态
