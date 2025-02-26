@@ -44,12 +44,13 @@
             border-radius: 6px;
             background: #007BFF;
             color: white;
+            margin-bottom: 20px;
             font-weight: bold;
+            margin-bottom: 20px;
             transition: 0.3s;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             display: block;
             margin: 0 auto;
-            margin-bottom: 20px;
         }
 
         button:hover {
@@ -85,15 +86,15 @@
         }
 
         .output-line span {
-            flex-grow: 1;
             padding-right: 10px;
         }
 
-        .account {
-            color: inherit;
+        /* 强制只改变状态部分的颜色，账号和冒号保持默认颜色 */
+        .output-line .account {
+            color: inherit; /* 确保账号部分颜色不变 */
         }
 
-        .status {
+        .output-line .status {
             font-weight: bold;
         }
     </style>
@@ -121,13 +122,15 @@
             const accounts = accountsInput.split('\n').map(account => account.trim());
             const validAccounts = [];
             const invalidAccounts = [];
+            const invalidAccountLines = [];
 
             // 对每个账号进行格式验证
-            accounts.forEach(account => {
+            accounts.forEach((account, index) => {
                 if (/^[A-Za-z0-9]+$/.test(account)) {
                     validAccounts.push(account);
                 } else {
                     invalidAccounts.push(account);
+                    invalidAccountLines.push(index + 1);  // 记录无效账号的行号
                 }
             });
 
@@ -139,7 +142,7 @@
 
             // 如果有无效账号
             if (invalidAccounts.length > 0) {
-                alert('以下账号格式无效: ' + invalidAccounts.join(', '));
+                alert(invalidAccountLines.map((line, index) => `第 ${line} 行: ${invalidAccounts[index]}账号无效`).join('\n'));
             }
 
             document.getElementById('loading').style.display = 'block';
