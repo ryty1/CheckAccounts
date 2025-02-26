@@ -10,7 +10,7 @@
             padding: 20px;
             background: url('php.png') no-repeat center center fixed;
             background-size: cover;
-            line-height: 0.8;
+            line-height: 1.5;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -76,6 +76,23 @@
         .status-timeout { color: #721c24; }
         .status-unknown { color: #333333; }
 
+        /* 保证输出内容对齐 */
+        pre {
+            width: 100%;
+            max-width: 600px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .output-line {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .output-line span {
+            flex-grow: 1;
+            padding-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -87,7 +104,7 @@
     </form>
 
     <div id="loading" style="display: none;">正在检测，请稍候...</div>
-    <pre id="result" style="white-space: pre-wrap; word-wrap: break-word; margin-top: 20px; font-weight: bold;"></pre>
+    <pre id="result" style="display: none;"></pre>
 
     <script>
         document.getElementById('accountForm').addEventListener('submit', function(e) {
@@ -157,9 +174,9 @@
 
             return data.split('\n').map(line => {
                 const [account, status] = line.split(':');
-                const statusClass = statusMessages[status] || 'status-unknown';
-                return `<span>${account}</span>: <span class="${statusClass}">${status}</span>`;
-            }).join('\n');
+                const statusClass = statusMessages[status.trim()] || 'status-unknown';
+                return `<div class="output-line"><span>${account}:</span><span class="${statusClass}">${status.trim()}</span></div>`;
+            }).join('');
         }
     </script>
 </body>
