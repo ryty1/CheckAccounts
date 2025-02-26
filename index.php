@@ -43,14 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $statusMessage = $statusInfo[0];
         $statusClass = $statusInfo[1];
 
-        // 返回带有CSS类的结果，使用flex布局对齐账号和冒号
-        $results[] = "<div class='output-line'>
-                        <span class='account'>{$username}:</span>
-                        <span class='status {$statusClass}'>{$statusMessage}</span>
-                      </div>";
+        // 返回带有CSS类的结果，账号和冒号不变色，状态部分变色
+        $results[] = "<div class='output-line'><span class='account'>{$username}:</span><span class='status {$statusClass}'>{$statusMessage}</span></div>";
     }
 
     // 以HTML形式输出，每行一个结果
-    echo "<html><body>" . implode("\n", $results) . "</body></html>";
+    echo implode("\n", $results);
 }
 ?>
