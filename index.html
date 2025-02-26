@@ -46,7 +46,6 @@
             color: white;
             margin-bottom: 20px;
             font-weight: bold;
-            margin-bottom: 20px;
             transition: 0.3s;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             display: block;
@@ -64,16 +63,18 @@
         }
 
         /* 不同状态的颜色 */
-        .status-normal { color: #007700; }
-        .status-banned { color: #cc0000; }
+        .status-normal { color: green; }
+        .status-banned { color: red; }
         .status-error { color: #856404; }
-        .status-unregistered { color: #666666; }
+        .status-unregistered { color: blue; }
         .status-unavailable { color: #b34d00; }
         .status-timeout { color: #721c24; }
         .status-unknown { color: #333333; }
 
         /* 保证输出内容对齐 */
         pre {
+           margin-top: 20px;
+            font-size: 16px;
             width: 100%;
             max-width: 600px;
             word-wrap: break-word;
@@ -87,21 +88,17 @@
             width: 100%; /* 确保宽度占满父容器 */
         }
 
-        .output-line span {
-            padding-right: 10px;
-        }
-        
         .output-line .account {
             color: inherit; /* 确保账号部分颜色不变 */
-            padding-right: 10px; /* 给账号和冒号之间添加一点间隔 */
-            width: 30%; /* 确保账号部分的宽度固定，使冒号对齐 */
+            padding-right: 20px; /* 给账号和冒号之间添加一点间隔 */
+            width: 80%; /* 确保账号部分的宽度固定，使冒号对齐 */
             text-align: left; /* 确保账号左对齐 */
        }
 
        .output-line .status {
            font-weight: bold;
-           text-align: left; /* 确保状态右对齐 */
-           width: 50%; /* 给状态部分占据更多宽度 */
+           text-align: left; /* 确保状态左对齐 */
+           width: 100%; /* 给状态部分占据更多宽度 */
        }
     </style>
 </head>
@@ -175,7 +172,7 @@
         function formatResults(data) {
             const statusMessages = {
                 "账号正常": "status-normal",
-                "账号封禁": "status-banned",
+                "账号已封禁": "status-banned",
                 "服务器错误": "status-error",
                 "账号未注册": "status-unregistered",
                 "VPS不可用": "status-unavailable",
@@ -186,7 +183,7 @@
             return data.split('\n').map(line => {
                 const [account, status] = line.split(':');
                 const statusClass = statusMessages[status.trim()] || 'status-unknown';
-                return `<div class="output-line"><span class="account">${account}:</span><span class="status ${statusClass}">${status.trim()}</span></div>`;
+                return `<div class="output-line"><span class="account">${account}</span>:   <span class="status ${statusClass}">${status.trim()}</span></div>`;
             }).join('');
         }
     </script>
