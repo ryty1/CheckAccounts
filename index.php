@@ -45,6 +45,7 @@
             background: #007BFF;
             color: white;
             font-weight: bold;
+            margin-bottom: 20px;
             transition: 0.3s;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             display: block;
