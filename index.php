@@ -51,6 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // 以HTML形式输出，每行一个结果
-    echo implode("\n", $results);
+    echo "<html><body>" . implode("\n", $results) . "</body></html>";
 }
 ?>
