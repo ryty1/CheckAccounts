@@ -1,15 +1,15 @@
 <?php
 
-// 定义状态消息及其对应的CSS类
+// 定义状态消息
 $statusMessages = [
-    200 => ["账号正常", "status-normal"],        // 账号正常
-    301 => ["账号未注册", "status-unregistered"], // 账号未注册
-    403 => ["账号已封禁", "status-banned"],      // 账号封禁
-    404 => ["账号正常", "status-normal"],        // 账号正常
-    500 => ["服务器错误", "status-error"],      // 服务器错误
-    502 => ["网关错误", "status-error"],        // 网关错误
-    503 => ["VPS不可用", "status-unavailable"], // VPS不可用
-    504 => ["网关超时", "status-timeout"],      // 网关超时
+    200 => "账号正常",
+    301 => "账号未注册",
+    403 => "账号已封禁",
+    404 => "账号正常",
+    500 => "服务器错误",
+    502 => "网关错误",
+    503 => "VPS不可用",
+    504 => "网关超时"
 ];
 
 // 处理请求
@@ -38,16 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        // 获取对应状态消息和CSS类
-        $statusInfo = $statusMessages[$statusCode] ?? ['未知状态', 'status-unknown'];
-        $statusMessage = $statusInfo[0];
-        $statusClass = $statusInfo[1];
-
-        // 返回带有CSS类的结果，账号和冒号不变色，状态部分变色
-        $results[] = "<div class='output-line'><span class='account'>{$username}:</span><span class='status {$statusClass}'>{$statusMessage}</span></div>";
+        $statusMessage = $statusMessages[$statusCode] ?? '未知状态';
+        $results[] = "{$username}: {$statusMessage}";
     }
 
-    // 以HTML形式输出，每行一个结果
+    // 以纯文本形式输出，每行一个结果
     echo implode("\n", $results);
 }
-?>
