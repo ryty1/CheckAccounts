@@ -56,6 +56,12 @@
             background: #0056b3;
         }
 
+        /* 禁用按钮样式 */
+        button:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
         #loading {
             display: none;
             text-align: center;
@@ -71,9 +77,9 @@
         .status-timeout { color: #721c24; }
         .status-unknown { color: #333333; }
 
-        /* 保证输出内容对齐 */
+        /* 保持输出对齐 */
         pre {
-           margin-top: 20px;
+            margin-top: 20px;
             font-size: 16px;
             width: 100%;
             max-width: 600px;
@@ -81,25 +87,24 @@
             white-space: pre-wrap;
         }
 
-        /* 强制只改变状态部分的颜色，账号和冒号保持默认颜色 */
+        /* 对齐账号和状态 */
         .output-line {
             display: flex;
-            justify-content: space-between; /* 将账号和状态分开，并对齐 */
-            width: 100%; /* 确保宽度占满父容器 */
+            justify-content: space-between;
+            width: 100%;
         }
 
         .output-line .account {
-            color: inherit; /* 确保账号部分颜色不变 */
-            padding-right: 20px; /* 给账号和冒号之间添加一点间隔 */
-            width: 80%; /* 确保账号部分的宽度固定，使冒号对齐 */
-            text-align: left; /* 确保账号左对齐 */
-       }
+            flex: 1;
+            text-align: left;
+            padding-right: 20px;
+        }
 
-       .output-line .status {
-           font-weight: bold;
-           text-align: left; /* 确保状态左对齐 */
-           width: 100%; /* 给状态部分占据更多宽度 */
-       }
+        .output-line .status {
+            font-weight: bold;
+            text-align: left;
+            min-width: 120px;
+        }
     </style>
 </head>
 <body>
@@ -109,14 +114,16 @@
         <button type="submit">开始检测</button>
     </form>
 
-    <div id="loading" style="display: none;">正在检测，请稍候...</div>
+    <div id="loading">正在检测，请稍候...</div>
     <pre id="result" style="display: none;"></pre>
 
     <script>
         document.getElementById('accountForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
+            const submitButton = document.querySelector('button[type="submit"]');
             const accountsInput = document.getElementById('accounts').value.trim();
+            
             if (!accountsInput) {
                 alert('请输入至少一个账号');
                 return;
@@ -127,27 +134,29 @@
             const invalidAccounts = [];
             const invalidAccountLines = [];
 
-            // 对每个账号进行格式验证
+            // 账号格式验证
             accounts.forEach((account, index) => {
                 if (/^[A-Za-z0-9]+$/.test(account)) {
                     validAccounts.push(account);
                 } else {
                     invalidAccounts.push(account);
-                    invalidAccountLines.push(index + 1);  // 记录无效账号的行号
+                    invalidAccountLines.push(index + 1);
                 }
             });
 
-            // 如果没有有效的账号
+            // 没有有效账号
             if (validAccounts.length === 0) {
                 alert('请输入有效的账号');
                 return;
             }
 
-            // 如果有无效账号
+            // 提示无效账号
             if (invalidAccounts.length > 0) {
-                alert(invalidAccountLines.map((line, index) => `第 ${line} 行: ${invalidAccounts[index]}账号无效`).join('\n'));
+                alert(invalidAccountLines.map((line, index) => `第 ${line} 行: ${invalidAccounts[index]} 账号无效`).join('\n'));
             }
 
+            // **按钮禁用，变灰**
+            submitButton.disabled = true;
             document.getElementById('loading').style.display = 'block';
             document.getElementById('result').style.display = 'none';
 
@@ -156,7 +165,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ accounts: validAccounts })
             })
-            .then(response => response.text())  // 返回的是HTML字符串
+            .then(response => response.text())
             .then(data => {
                 document.getElementById('loading').style.display = 'none';
                 const resultDiv = document.getElementById('result');
@@ -166,6 +175,10 @@
             .catch(error => {
                 document.getElementById('loading').style.display = 'none';
                 alert('请求失败，请稍后再试');
+            })
+            .finally(() => {
+                // **任务完成后恢复按钮**
+                submitButton.disabled = false;
             });
         });
 
@@ -183,7 +196,10 @@
             return data.split('\n').map(line => {
                 const [account, status] = line.split(':');
                 const statusClass = statusMessages[status.trim()] || 'status-unknown';
-                return `<div class="output-line"><span class="account">${account}</span>:   <span class="status ${statusClass}">${status.trim()}</span></div>`;
+                return `<div class="output-line">
+                            <span class="account">${account}</span>:   
+                            <span class="status ${statusClass}">${status.trim()}</span>
+                        </div>`;
             }).join('');
         }
     </script>
