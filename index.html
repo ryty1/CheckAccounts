@@ -80,42 +80,29 @@
             white-space: pre-wrap;
         }
 
+        /* 强制只改变状态部分的颜色，账号和冒号保持默认颜色 */
         .output-line {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* 将账号和状态分开，并对齐 */
+            width: 100%; /* 确保宽度占满父容器 */
         }
 
         .output-line span {
             padding-right: 10px;
         }
-
-        /* 强制只改变状态部分的颜色，账号和冒号保持默认颜色 */
+        
         .output-line .account {
             color: inherit; /* 确保账号部分颜色不变 */
-        }
+            padding-right: 10px; /* 给账号和冒号之间添加一点间隔 */
+            width: 30%; /* 确保账号部分的宽度固定，使冒号对齐 */
+            text-align: left; /* 确保账号左对齐 */
+       }
 
-        .output-line .status {
-            font-weight: bold;
-        }
-        /* 强制只改变状态部分的颜色，账号和冒号保持默认颜色 */
-.output-line {
-    display: flex;
-    justify-content: space-between; /* 将账号和状态分开，并对齐 */
-    width: 100%; /* 确保宽度占满父容器 */
-}
-
-.output-line .account {
-    color: inherit; /* 确保账号部分颜色不变 */
-    padding-right: 10px; /* 给账号和冒号之间添加一点间隔 */
-    width: 30%; /* 确保账号部分的宽度固定，使冒号对齐 */
-    text-align: left; /* 确保账号左对齐 */
-}
-
-.output-line .status {
-    font-weight: bold;
-    text-align: right; /* 确保状态右对齐 */
-    width: 60%; /* 给状态部分占据更多宽度 */
-}
+       .output-line .status {
+           font-weight: bold;
+           text-align: right; /* 确保状态右对齐 */
+           width: 60%; /* 给状态部分占据更多宽度 */
+       }
     </style>
 </head>
 <body>
