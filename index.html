@@ -39,7 +39,7 @@
             padding: 10px;
             border-radius: 6px;
             border: 1px solid #ccc;
-            resize: vertical; /* 只允许上下调整 */
+            resize: vertical;
         }
 
         button {
@@ -61,37 +61,33 @@
             background: #0056b3;
         }
 
-        .result {
+        #loading {
+            display: none;
+            text-align: center;
             margin-top: 20px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            max-width: 600px;
-            width: 100%;
         }
 
         /* 不同状态的颜色 */
-        .status-normal { background: #e6f7e6; color: #007700; } /* 账号正常 */
-        .status-banned { background: #ffe6e6; color: #cc0000; } /* 账号封禁 */
-        .status-error { background: #fff3cd; color: #856404; }  /* 服务器错误 */
-        .status-unregistered { background: #f0f0f0; color: #666666; } /* 账号未注册 */
-        .status-unavailable { background: #ffebcd; color: #b34d00; } /* VPS不可用 */
-        .status-timeout { background: #f8d7da; color: #721c24; } /* 网关超时 */
-        .status-unknown { background: #e0e0e0; color: #333333; } /* 未知状态 */
+        .status-normal { color: #007700; }
+        .status-banned { color: #cc0000; }
+        .status-error { color: #856404; }
+        .status-unregistered { color: #666666; }
+        .status-unavailable { color: #b34d00; }
+        .status-timeout { color: #721c24; }
+        .status-unknown { color: #333333; }
+
     </style>
 </head>
 <body>
     <h1>账号检测</h1>
     <form id="accountForm">
         <label for="accounts">请输入账号，多个账号每行一个</label><br>
-        <textarea id="accounts" name="accounts"></textarea><br><br>
+        <textarea id="accounts" name="accounts" placeholder="请输入账号，多个账号每行一个"></textarea><br><br>
         <button type="submit">开始检测</button>
     </form>
 
-    <div id="loading" style="display: none; text-align: center;">正在检测，请稍候...</div>
-    <div id="result" class="result" style="display: none;"></div>
+    <div id="loading" style="display: none;">正在检测，请稍候...</div>
+    <pre id="result" style="white-space: pre-wrap; word-wrap: break-word; margin-top: 20px; font-weight: bold;"></pre>
 
     <script>
         document.getElementById('accountForm').addEventListener('submit', function(e) {
@@ -139,7 +135,7 @@
             .then(data => {
                 document.getElementById('loading').style.display = 'none';
                 const resultDiv = document.getElementById('result');
-                resultDiv.innerHTML = data;
+                resultDiv.innerHTML = formatResults(data);
                 resultDiv.style.display = 'block';
             })
             .catch(error => {
@@ -147,6 +143,24 @@
                 alert('请求失败，请稍后再试');
             });
         });
+
+        function formatResults(data) {
+            const statusMessages = {
+                "账号正常": "status-normal",
+                "账号封禁": "status-banned",
+                "服务器错误": "status-error",
+                "账号未注册": "status-unregistered",
+                "VPS不可用": "status-unavailable",
+                "网关超时": "status-timeout",
+                "未知状态": "status-unknown"
+            };
+
+            return data.split('\n').map(line => {
+                const [account, status] = line.split(':');
+                const statusClass = statusMessages[status] || 'status-unknown';
+                return `<span>${account}</span>: <span class="${statusClass}">${status}</span>`;
+            }).join('\n');
+        }
     </script>
 </body>
 </html>
