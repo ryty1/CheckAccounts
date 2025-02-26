@@ -1,5 +1,12 @@
 <?php
 
+// 检查当前请求是否是根路径
+if ($_SERVER['REQUEST_URI'] == '/') {
+    // 重定向到 index.html
+    header("Location: /index.html", true, 301);
+    exit();
+}
+
 // 定义状态消息
 $statusMessages = [
     200 => "账号正常",
