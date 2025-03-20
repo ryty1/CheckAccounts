@@ -1,71 +1,180 @@
-<?php
-// 检查当前请求是否是根路径，重定向到 index.html
-if ($_SERVER['REQUEST_URI'] == '/') {
-    header("Location: /index.html", true, 301);
-    exit();
-}
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>账号检测</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: url('php.png') no-repeat center center fixed;
+            background-size: cover;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-// 定义状态消息
-$statusMessages = [
-    200 => "账号正常",
-    301 => "账号未注册",
-    302 => "账号正常",
-    403 => "账号已封禁",
-    404 => "账号正常",
-    500 => "服务器错误",
-    502 => "网关错误",
-    503 => "VPS不可用",
-    504 => "网关超时"
-];
+        h1 {
+            text-align: center;
+        }
 
-// 处理 POST 请求
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 获取前端提交的 JSON 数据
-    $input = json_decode(file_get_contents('php://input'), true);
-    $accounts = $input['accounts'] ?? [];
+        form {
+            width: 100%;
+            max-width: 600px;
+        }
 
-    if (empty($accounts)) {
-        echo json_encode(["error" => "请输入账号"], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
+        textarea {
+            width: 95%;
+            height: 150px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
 
-    $results = [];
+        button {
+            font-size: 18px;
+            padding: 12px 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            background: #007BFF;
+            color: white;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: 0.3s;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            display: block;
+            margin: 0 auto;
+        }
 
-    foreach ($accounts as $username) {
-        $originalUsername = $username; // 保留原始用户名
+        button:hover {
+            background: #0056b3;
+        }
 
-        // 处理 Punycode 转码（适用于包含中文字符的账号）
-        if (preg_match('/[^\x00-\x7F]/', $username)) {
-            $punycodeUsername = idn_to_ascii($username, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
-            if ($punycodeUsername === false) {
-                $results[] = "$originalUsername: 转码失败";
-                continue;
+        button:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .status-normal { color: green; }
+        .status-banned { color: red; }
+        .status-error { color: #856404; }
+        .status-unregistered { color: blue; }
+        .status-unavailable { color: #b34d00; }
+        .status-timeout { color: #721c24; }
+        .status-unknown { color: #333333; }
+
+        pre {
+            margin-top: 20px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 600px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .output-line {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .output-line .account {
+            color: inherit;
+            padding-right: 20px;
+            width: 80%;
+            text-align: left;
+        }
+
+        .output-line .status {
+           font-weight: bold;
+           text-align: left;
+           width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>账号检测</h1>
+    <form id="accountForm">
+        <textarea id="accounts" name="accounts" placeholder="请输入账号，多个账号每行一个"></textarea><br>
+        <button type="submit">开始检测</button>
+    </form>
+
+    <div id="loading">正在检测，请稍候...</div>
+    <pre id="result" style="display: none;"></pre>
+
+    <script>
+        document.getElementById('accountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const submitButton = document.querySelector('button[type="submit"]');
+            const accountsInput = document.getElementById('accounts').value.trim();
+            
+            if (!accountsInput) {
+                alert('请输入至少一个账号');
+                return;
             }
-            $username = $punycodeUsername;
+
+            const accounts = accountsInput.split('\n').map(account => account.trim()).filter(account => account.length > 0);
+            
+            if (accounts.length === 0) {
+                alert('请输入有效的账号');
+                return;
+            }
+
+            submitButton.disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+
+            fetch('/index.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accounts })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = formatResults(data);
+                resultDiv.style.display = 'block';
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                alert('请求失败，请稍后再试');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+            });
+        });
+
+        function formatResults(data) {
+            const statusMessages = {
+                "账号正常": "status-normal",
+                "账号已封禁": "status-banned",
+                "服务器错误": "status-error",
+                "账号未注册": "status-unregistered",
+                "VPS不可用": "status-unavailable",
+                "网关超时": "status-timeout",
+                "未知状态": "status-unknown"
+            };
+
+            return data.map(line => {
+                const [account, status] = line.split(':');
+                const statusClass = statusMessages[status.trim()] || 'status-unknown';
+                return `<div class="output-line"><span class="account">${account}</span>:   <span class="status ${statusClass}">${status.trim()}</span></div>`;
+            }).join('');
         }
-
-        // 确保用户名格式正确
-        if (!preg_match('/^[A-Za-z0-9-]+$/', $username)) {
-            $results[] = "$originalUsername: 账号格式错误";
-            continue;
-        }
-
-        // 访问账号检测 URL
-        $apiUrl = "https://{$username}.serv00.net";
-        $ch = curl_init($apiUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false); // 防止重定向
-        curl_setopt($ch, CURLOPT_HEADER, true); // 只获取头部信息
-        curl_setopt($ch, CURLOPT_NOBODY, true); // 不返回页面内容
-        curl_exec($ch);
-        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        // 解析状态码对应的消息
-        $statusMessage = $statusMessages[$statusCode] ?? '未知状态';
-        $results[] = "$originalUsername: $statusMessage";
-    }
-
-    // 返回 JSON 格式的响应
-    echo json_encode($results, JSON_UNESCAPED_UNICODE);
-}
+    </script>
+</body>
+</html>
