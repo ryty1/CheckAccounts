@@ -137,7 +137,7 @@
 
             // 账号格式验证
             accounts.forEach((account, index) => {
-                if (/^[A-Za-z0-9]+$/.test(account)) {
+                if (/^[A-Za-z0-9\u4e00-\u9fa5-]+$/.test(account)) {
                     validAccounts.push(account);
                 } else {
                     invalidAccounts.push(account);
