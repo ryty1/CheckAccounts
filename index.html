@@ -32,8 +32,10 @@
             margin-bottom: 10px;
             padding: 10px;
             border-radius: 6px;
-            border: 1px solid #ccc;
+            border: 2px solid #ccc;
+            background-color: transparent; /* 设置背景透明 */
             resize: vertical;
+            color: #333;  /* 设置字体颜色，避免透明背景影响可读性 */
         }
 
         button {
@@ -75,15 +77,6 @@
         .status-timeout { color: #721c24; }
         .status-unknown { color: #333333; }
 
-        pre {
-            margin-top: 20px;
-            font-size: 16px;
-            width: 100%;
-            max-width: 600px;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-        }
-
         /* 让输出格式对齐 */
         .output-container {
             display: flex;
@@ -91,30 +84,43 @@
             align-items: center;
             width: 100%;
             max-width: 600px;
+            border: 2px solid #ddd;
+            background: transparent; /* 背景透明 */
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px; /* 设置字体为12px */
         }
 
         .output-line {
             display: flex;
-            justify-content: space-between;
             width: 100%;
-            border-bottom: 1px solid #ddd;
-            padding: 8px 0;
+            border-bottom: 2px solid #ddd;
+            padding: 2px 0;  /* 缩小行高 */
         }
 
-        .output-line .account {
+        .output-line.header {
+            font-weight: bold;
+            background-color: transparent;  /* 设置表头背景为透明 */
+            border-bottom: 2px solid #000;
+        }
+
+        .output-line span {
+            padding: 5px 10px;
+        }
+
+        .account {
             width: 40%;
             text-align: left;
-            padding-right: 10px;
         }
 
-        .output-line .ip-tag {
+        .ip-tag {
             width: 20%;
             text-align: center;
             font-weight: bold;
-            color: #333;
         }
 
-        .output-line .status {
+        .status {
             width: 40%;
             text-align: left;
             font-weight: bold;
@@ -186,21 +192,23 @@
                 "未知状态": "status-unknown"
             };
 
-            return data.map(line => {
-                const match = line.match(/(.+?)【(.+?)】:\s*(.+)/);
-                if (!match) return '';
+            let resultHTML = `
+                <div class="output-line header">
+                    <span class="account">账号</span>
+                    <span class="ip-tag">主机</span>
+                    <span class="status">状态</span>
+                </div>`;
 
-                const account = match[1].trim();
-                const ipTag = match[2].trim();
-                const status = match[3].trim();
-                const statusClass = statusMessages[status] || 'status-unknown';
-
+            resultHTML += data.map(item => {
+                const statusClass = statusMessages[item.status] || 'status-unknown';
                 return `<div class="output-line">
-                            <span class="account">${account}</span>
-                            <span class="ip-tag">${ipTag}</span>
-                            <span class="status ${statusClass}">${status}</span>
+                            <span class="account">${item.account}</span>
+                            <span class="ip-tag">${item.ip_tag}</span>
+                            <span class="status ${statusClass}">${item.status}</span>
                         </div>`;
             }).join('');
+
+            return resultHTML;
         }
     </script>
 </body>
