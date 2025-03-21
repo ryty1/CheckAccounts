@@ -18,6 +18,33 @@ $statusMessages = [
     504 => "网关超时"
 ];
 
+// 定义 IP 表
+$ipTable = [
+    '128.204.218.48' => 's0',
+    '31.186.83.254' => 's1',
+    '128.204.223.46' => 's2',
+    '128.204.223.70' => 's3',
+    '128.204.223.94' => 's4',
+    '128.204.223.98' => 's5',
+    '128.204.223.100' => 's6',
+    '128.204.223.119' => 's7',
+    '128.204.223.113' => 's8',
+    '128.204.223.115' => 's9',
+    '128.204.223.111' => 's10',
+    '128.204.223.117' => 's11',
+    '85.194.246.69' => 's12',
+    '128.204.223.42' => 's13',
+    '188.68.240.160' => 's14',
+    '188.68.250.201' => 's15',
+    '207.180.248.6' => 's16'
+];
+
+// 获取域名的真实 IP
+function getDomainIp($domain) {
+    $records = dns_get_record($domain, DNS_A);
+    return $records ? $records[0]['ip'] : '无法解析';
+}
+
 // 处理 POST 请求
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 获取前端提交的 JSON 数据
@@ -50,8 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             continue;
         }
 
-        // 访问账号检测 URL
-        $apiUrl = "https://{$username}.serv00.net";
+        // 获取该账号域名的 IP 地址
+        $domain = "{$username}.serv00.net";
+        $ipAddress = getDomainIp($domain);
+
+        // 获取状态码
+        $apiUrl = "https://$domain";
         $ch = curl_init($apiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false); // 防止重定向
@@ -63,9 +94,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // 解析状态码对应的消息
         $statusMessage = $statusMessages[$statusCode] ?? '未知状态';
-        $results[] = "$originalUsername: $statusMessage";
+
+        // 判断 IP 标签
+        if ($statusCode === 301) { 
+            // 账号未注册时，显示【未知】
+            $ipTag = '--';
+        } else {
+            $ipTag = $ipTable[$ipAddress] ?? '--';
+        }
+
+        // 返回格式： 账号【sX】: 状态信息
+        $results[] = "{$originalUsername}【{$ipTag}】: $statusMessage";
     }
 
     // 返回 JSON 格式的响应
     echo json_encode($results, JSON_UNESCAPED_UNICODE);
 }
+?>
