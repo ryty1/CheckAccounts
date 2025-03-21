@@ -71,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = $punycodeUsername;
         }
 
-        // 确保用户名格式正确
-        if (!preg_match('/^[A-Za-z0-9-]+$/', $username)) {
+        // 确保用户名格式正确（不允许 `-` 出现在首尾）
+        if (!preg_match('/^(?!-)[A-Za-z0-9-]+(?<!-)$/', $username)) {
             $results[] = ["account" => $originalUsername, "ip_tag" => "--", "status" => "账号格式错误"];
             continue;
         }
@@ -95,8 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 解析状态码对应的消息
         $statusMessage = $statusMessages[$statusCode] ?? '未知状态';
 
-        // 判断 IP 标签
-        $ipTag = ($statusCode === 301) ? "--" : ($ipTable[$ipAddress] ?? "--");
+        // 判断 IP 标签（301 状态码和未知状态时 `ip_tag` 应该是 "--"）
+        $ipTag = ($statusCode === 301 || $statusMessage === '未知状态') ? "--" : ($ipTable[$ipAddress] ?? "--");
 
         $results[] = [
             "account" => $originalUsername,
