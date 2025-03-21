@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (preg_match('/[^\x00-\x7F]/', $username)) {
             $punycodeUsername = idn_to_ascii($username, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
             if ($punycodeUsername === false) {
-                $results[] = "$originalUsername: 转码失败";
+                $results[] = ["account" => $originalUsername, "ip_tag" => "--", "status" => "转码失败"];
                 continue;
             }
             $username = $punycodeUsername;
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // 确保用户名格式正确
         if (!preg_match('/^[A-Za-z0-9-]+$/', $username)) {
-            $results[] = "$originalUsername: 账号格式错误";
+            $results[] = ["account" => $originalUsername, "ip_tag" => "--", "status" => "账号格式错误"];
             continue;
         }
 
@@ -85,9 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $apiUrl = "https://$domain";
         $ch = curl_init($apiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false); // 防止重定向
-        curl_setopt($ch, CURLOPT_HEADER, true); // 只获取头部信息
-        curl_setopt($ch, CURLOPT_NOBODY, true); // 不返回页面内容
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
         curl_exec($ch);
         $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -96,15 +96,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $statusMessage = $statusMessages[$statusCode] ?? '未知状态';
 
         // 判断 IP 标签
-        if ($statusCode === 301) { 
-            // 账号未注册时，显示【未知】
-            $ipTag = '--';
-        } else {
-            $ipTag = $ipTable[$ipAddress] ?? '--';
-        }
+        $ipTag = ($statusCode === 301) ? "--" : ($ipTable[$ipAddress] ?? "--");
 
-        // 返回格式： 账号【sX】: 状态信息
-        $results[] = "{$originalUsername}【{$ipTag}】: $statusMessage";
+        $results[] = [
+            "account" => $originalUsername,
+            "ip_tag" => $ipTag,
+            "status" => $statusMessage
+        ];
     }
 
     // 返回 JSON 格式的响应
