@@ -8,12 +8,18 @@
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            background: url('php.png') no-repeat center center fixed;
-            background-size: cover;
             line-height: 1.5;
             display: flex;
             flex-direction: column;
             align-items: center;
+            background: linear-gradient(135deg,  
+            #e3f2fd,  
+            #d7e1f2,  
+            #d1c4e9,  
+            #b39ddb  
+            ); 
+            background-attachment: fixed;  
+            background-size: 100% 100%; 
         }
 
         h1 {
@@ -129,7 +135,7 @@
     </style>
 </head>
 <body>
-    <h1>账号检测</h1>
+    <h1>Serv00 账号检测</h1>
     <form id="accountForm">
         <textarea id="accounts" name="accounts" placeholder="请输入账号，多个账号每行一个"></textarea><br>
         <button type="submit">开始检测</button>
