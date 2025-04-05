@@ -22,8 +22,25 @@
             background-size: 100% 100%; 
         }
 
-        h1 {
-            text-align: center;
+        h1.gradient-text {
+            margin-top: 10px; 
+            margin-bottom: 10px; 
+        }
+
+        .gradient-text {
+            font-size: 2.1em; 
+            font-weight: bold;
+            background: linear-gradient(90deg, #ff5733, #ffbd33, #33ff57, #338aff, #ff33a1, #ff5733);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            animation: gradientMove 3s infinite linear;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
         }
 
         form {
@@ -39,9 +56,9 @@
             padding: 10px;
             border-radius: 6px;
             border: 2px solid #ccc;
-            background-color: transparent; /* 设置背景透明 */
+            background-color: transparent;
             resize: vertical;
-            color: #333;  /* 设置字体颜色，避免透明背景影响可读性 */
+            color: #333;
         }
 
         button {
@@ -85,7 +102,6 @@
         .status-timeout { color: #721c24; }
         .status-unknown { color: #333333; }
 
-        /* 让输出格式对齐 */
         .output-container {
             display: flex;
             flex-direction: column;
@@ -93,23 +109,23 @@
             width: 100%;
             max-width: 600px;
             border: 2px solid #ddd;
-            background: transparent; /* 背景透明 */
+            background: transparent;
             padding: 10px;
             border-radius: 8px;
             margin-top: 20px;
-            font-size: 13px; /* 设置字体为12px */
+            font-size: 13px;
         }
 
         .output-line {
             display: flex;
             width: 100%;
             border-bottom: 2px solid #ddd;
-            padding: 2px 0;  /* 缩小行高 */
+            padding: 2px 0;
         }
 
         .output-line.header {
             font-weight: bold;
-            background-color: transparent;  /* 设置表头背景为透明 */
+            background-color: transparent;
             border-bottom: 2px solid #000;
         }
 
@@ -136,7 +152,8 @@
     </style>
 </head>
 <body>
-    <h1>Serv00 账号检测</h1>
+    <h1 class="gradient-text">Serv00 账号检测</h1>
+
     <form id="accountForm">
         <textarea id="accounts" name="accounts" placeholder="请输入账号，多个账号每行一个&#10;&#10;【账号待验证】说明：默认域名已删除，很大可能是账号正常，极少也有可能是已封禁，需要自行 登录SSH 或 面板 验证。"></textarea><br>
         <button type="submit">开始检测</button>
@@ -165,6 +182,7 @@
             }
 
             submitButton.disabled = true;
+            submitButton.textContent = '检测中...';
             document.getElementById('loading').style.display = 'block';
             document.getElementById('result').style.display = 'none';
 
@@ -181,11 +199,12 @@
                 resultDiv.style.display = 'block';
             })
             .catch(error => {
-                document.getElementById('loading').style.display = 'none';
+                console.error('请求出错：', error);
                 alert('请求失败，请稍后再试');
             })
             .finally(() => {
                 submitButton.disabled = false;
+                submitButton.textContent = '开始检测';
             });
         });
 
